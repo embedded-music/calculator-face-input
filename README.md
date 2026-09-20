@@ -35,19 +35,22 @@ long hold produces a distinct event. Also verify the Core Gray A/B/C buttons.
 ## Observed original-panel protocol
 
 Hardware testing found release-oriented ASCII-like events. The physical layout
-maps as follows:
+is:
 
 ```text
-AC  A/08   M  M     %  %     /  /
-7   7      8  8     9  9     *  *
-4   4      5  5     6  6     -  -
-1   1      2  2     3  3     +  +
-.   .      0  0    +/- `      =  =/0D
+AC   M    %    /
+7    8    9    *
+4    5    6    -
+1    2    3    +
+.    0   +/-   =
 ```
 
-`AC` emits `A` when a short press is released. If held, it emits `0x08` as soon
-as an internal time threshold is reached; releasing it afterward emits nothing.
-`=` follows the same pattern: `=` on a short release, or carriage return
-(`0x0D`) when the hold threshold is reached followed by a silent release. The
-other keys emit the displayed character on release. Core A/B/C provide normal
-press and release edges independently of the Face.
+Most keys emit their printed character on release. The exceptions are:
+
+| Physical key | Short press | Long hold |
+| --- | --- | --- |
+| `AC` | `A` (`0x41`) on release | `0x08` at the hold threshold; release is silent |
+| `+/-` | `` ` `` (`0x60`) on release | Same value on release |
+| `=` | `=` (`0x3D`) on release | `0x0D` at the hold threshold; release is silent |
+
+Core A/B/C provide normal press and release edges independently of the Face.
