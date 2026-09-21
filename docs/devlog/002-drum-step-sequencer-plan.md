@@ -106,6 +106,22 @@ a MIDI Bank Select equivalent or shared umbrella contract.
 A reusable sequencer or paged-selection contract should be extracted only if a
 second real consumer exposes the same stable concepts.
 
+The umbrella's
+[interaction semantics radar](https://github.com/fczuardi/embedded-music-experiments/blob/main/docs/design/interaction-semantics-radar.md)
+keeps the wider comparison with samplers and sequencers. Koala and the Roland
+P-6 distinguish one-shot triggers from gate-controlled voices, while the P-6
+also treats probability, gate time, micro-timing, sub-steps, and motion as
+sequencer data. Teenage Engineering Pocket Operators show how a sixteen-key
+grid can switch coherently between sound selection, step editing, effects, and
+pattern arrangement without making those concepts one generic command.
+
+For this app, that comparison reinforces a deliberately small first model:
+Calculator release events edit boolean steps, and active steps produce one-shot
+drum triggers. Richer step expression remains research rather than a baseline
+requirement. The Face's lack of key-down events therefore does not prevent a
+useful first instrument; it primarily rules out faithful gate performance from
+those keys.
+
 ## Incremental validation
 
 Implementation should proceed in hardware-testable slices:
