@@ -18,6 +18,15 @@ press and release edges from the Core Gray's A, B, and C buttons. It deliberatel
 does not assign meanings to Calculator keys before the hardware map has been
 observed.
 
+### `drum-step-sequencer` (planned)
+
+A self-contained four-track, sixteen-step drum sequencer for the Calculator
+Face and Core Gray speaker. The Calculator selects tracks and toggles steps;
+the Core buttons provide mute, clear, and section navigation gestures. It will
+run continuously without requiring an external MIDI controller. See
+[`docs/devlog/002-drum-step-sequencer-plan.md`](docs/devlog/002-drum-step-sequencer-plan.md)
+for the interaction and incremental validation plan.
+
 ## Commands
 
 PlatformIO Core 6.2 or newer is required by the current pioarduino platform.
