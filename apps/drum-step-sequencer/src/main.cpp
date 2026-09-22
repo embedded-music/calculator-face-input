@@ -19,7 +19,7 @@ constexpr uint32_t STEP_INTERVAL_MS = 60000 / (TEMPO_BPM * 4);
 constexpr uint8_t AMY_SYNTH_ID = 1;
 constexpr uint8_t AMY_DRUM_VOICES = 1;
 constexpr uint16_t AMY_GM_DRUM_PATCH = 258;
-constexpr uint8_t TRACK_ONE_MIDI_NOTE = 38;
+constexpr uint8_t TRACK_MIDI_NOTES[TRACK_COUNT] = {38, 42, 46, 55};
 constexpr float DRUM_VELOCITY = 1.0f;
 constexpr uint32_t DRUM_TAIL_MS = 1500;
 constexpr uint8_t SPEAKER_VOLUME = 128;
@@ -80,9 +80,14 @@ void reportCoreButtons() {
 }
 
 void triggerCurrentStep() {
-  if (!editor.stepActive(0, editor.currentStep())) return;
-  audioGate.wake(DRUM_TAIL_MS);
-  drumSlot.noteOn(TRACK_ONE_MIDI_NOTE, DRUM_VELOCITY);
+  bool hasTrigger = false;
+  for (uint8_t track = 0; track < TRACK_COUNT; track++) {
+    if (editor.stepActive(track, editor.currentStep())) {
+      if (!hasTrigger) audioGate.wake(DRUM_TAIL_MS);
+      drumSlot.noteOn(TRACK_MIDI_NOTES[track], DRUM_VELOCITY);
+      hasTrigger = true;
+    }
+  }
 }
 }  // namespace
 
