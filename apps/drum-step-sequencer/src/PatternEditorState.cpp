@@ -14,3 +14,7 @@ bool PatternEditorState::toggleStep(uint8_t step) {
   active = !active;
   return active;
 }
+
+void PatternEditorState::advanceStep() {
+  currentStep_ = (currentStep_ + 1) % STEP_COUNT;
+}

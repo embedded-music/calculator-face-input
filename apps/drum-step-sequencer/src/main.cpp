@@ -5,14 +5,18 @@
 #include "CalculatorCommand.h"
 #include "PatternEditorState.h"
 #include "PatternEditorView.h"
+#include "StepClock.h"
 
 namespace {
 constexpr uint8_t CALCULATOR_I2C_ADDRESS = 0x08;
 constexpr uint8_t CALCULATOR_INTERRUPT_PIN = 5;
 constexpr uint32_t I2C_FREQUENCY_HZ = 100000;
+constexpr uint16_t TEMPO_BPM = 120;
+constexpr uint32_t STEP_INTERVAL_MS = 60000 / (TEMPO_BPM * 4);
 
 PatternEditorState editor;
 PatternEditorView view(M5.Display);
+StepClock stepClock(STEP_INTERVAL_MS);
 
 bool calculatorAcknowledges() {
   Wire.beginTransmission(CALCULATOR_I2C_ADDRESS);
@@ -74,6 +78,7 @@ void setup() {
   pinMode(CALCULATOR_INTERRUPT_PIN, INPUT_PULLUP);
   Wire.begin(21, 22, I2C_FREQUENCY_HZ);
   view.draw(editor);
+  stepClock.begin(millis());
   Serial.printf("drum_step_sequencer: calculator_detected=%s\n",
                 calculatorAcknowledges() ? "yes" : "no");
 }
@@ -81,6 +86,14 @@ void setup() {
 void loop() {
   M5.update();
   reportCoreButtons();
+
+  const uint8_t elapsedSteps = stepClock.elapsedSteps(millis());
+  if (elapsedSteps > 0) {
+    const uint8_t previousStep = editor.currentStep();
+    for (uint8_t count = 0; count < elapsedSteps; count++) editor.advanceStep();
+    view.drawPlayheadChange(editor, previousStep);
+  }
+
   if (digitalRead(CALCULATOR_INTERRUPT_PIN) == LOW) {
     uint8_t value = 0;
     if (readCalculatorByte(value)) handleCalculatorValue(value);

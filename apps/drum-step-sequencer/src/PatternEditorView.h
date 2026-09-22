@@ -10,6 +10,8 @@ class PatternEditorView {
   void draw(const PatternEditorState& state);
   void drawTrack(const PatternEditorState& state, uint8_t track);
   void drawStep(const PatternEditorState& state, uint8_t track, uint8_t step);
+  void drawPlayheadChange(const PatternEditorState& state,
+                          uint8_t previousStep);
 
  private:
   int16_t cellWidth() const;

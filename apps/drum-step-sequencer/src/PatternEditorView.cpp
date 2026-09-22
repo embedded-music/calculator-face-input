@@ -12,6 +12,7 @@ constexpr uint16_t COLOR_GRID = 0x4208;
 constexpr uint16_t COLOR_STEP_OFF = 0x2104;
 constexpr uint16_t COLOR_STEP_ON = TFT_CYAN;
 constexpr uint16_t COLOR_SELECTED = TFT_YELLOW;
+constexpr uint16_t COLOR_PLAYHEAD = TFT_MAGENTA;
 constexpr uint16_t COLOR_TEXT = TFT_WHITE;
 constexpr uint16_t COLOR_MUTED_TEXT = 0x8410;
 }  // namespace
@@ -45,6 +46,20 @@ void PatternEditorView::drawStep(const PatternEditorState& state,
                                                        : COLOR_STEP_OFF;
   display_.fillRect(x + 2, y + 5, cellWidth() - 4, rowHeight() - 10, fill);
   display_.drawRect(x + 1, y + 4, cellWidth() - 2, rowHeight() - 8, border);
+  if (step == state.currentStep()) {
+    display_.fillRect(x + cellWidth() / 2 - 1, y + 7, 3,
+                      rowHeight() - 14, COLOR_PLAYHEAD);
+  }
+}
+
+void PatternEditorView::drawPlayheadChange(const PatternEditorState& state,
+                                           uint8_t previousStep) {
+  display_.startWrite();
+  for (uint8_t track = 0; track < TRACK_COUNT; track++) {
+    drawStep(state, track, previousStep);
+    drawStep(state, track, state.currentStep());
+  }
+  display_.endWrite();
 }
 
 void PatternEditorView::drawTrack(const PatternEditorState& state,
