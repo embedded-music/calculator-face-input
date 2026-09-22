@@ -4,6 +4,10 @@ bool PatternEditorState::stepActive(uint8_t track, uint8_t step) const {
   return track < TRACK_COUNT && step < STEP_COUNT && steps_[track][step];
 }
 
+const DrumSound& PatternEditorState::soundForTrack(uint8_t track) const {
+  return DRUM_SOUNDS[soundIndices_[track < TRACK_COUNT ? track : 0]];
+}
+
 void PatternEditorState::selectTrack(uint8_t track) {
   if (track < TRACK_COUNT) selectedTrack_ = track;
 }
@@ -41,4 +45,10 @@ void PatternEditorState::increaseVolume() {
   speakerVolume_ = speakerVolume_ < UINT8_MAX - VOLUME_INCREMENT
                        ? speakerVolume_ + VOLUME_INCREMENT
                        : UINT8_MAX;
+}
+
+void PatternEditorState::selectSound(uint8_t soundIndex) {
+  if (soundIndex < DRUM_SOUND_COUNT) {
+    soundIndices_[selectedTrack_] = soundIndex;
+  }
 }

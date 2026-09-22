@@ -4,7 +4,7 @@
 
 #include "PatternEditorState.h"
 
-enum class ControlLayer : uint8_t { Default, Settings };
+enum class ControlLayer : uint8_t { Default, Settings, Sound };
 
 class PatternEditorView {
  public:

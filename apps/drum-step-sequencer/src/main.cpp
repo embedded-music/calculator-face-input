@@ -17,7 +17,6 @@ constexpr uint32_t I2C_FREQUENCY_HZ = 100000;
 constexpr uint8_t AMY_SYNTH_ID = 1;
 constexpr uint8_t AMY_DRUM_VOICES = 1;
 constexpr uint16_t AMY_GM_DRUM_PATCH = 258;
-constexpr uint8_t TRACK_MIDI_NOTES[TRACK_COUNT] = {38, 42, 46, 55};
 constexpr float DRUM_VELOCITY = 1.0f;
 constexpr uint32_t DRUM_TAIL_MS = 1500;
 
@@ -62,7 +61,24 @@ void handleCalculatorValue(uint8_t value) {
     return;
   }
 
-  if (M5.BtnB.isPressed() || M5.BtnC.isPressed()) return;
+  if (M5.BtnB.isPressed()) {
+    const CalculatorCommand command = commandForCalculatorValue(value);
+    uint8_t soundIndex = DRUM_SOUND_COUNT;
+    if (command.type == CalculatorCommandType::SelectTrack) {
+      soundIndex = command.index;
+    } else if (command.type == CalculatorCommandType::ToggleStep) {
+      soundIndex = TRACK_COUNT + command.index;
+    }
+    if (soundIndex >= DRUM_SOUND_COUNT) return;
+    editor.selectSound(soundIndex);
+    view.drawFooter(editor, ControlLayer::Sound);
+    const DrumSound& sound = editor.selectedSound();
+    Serial.printf("editor: action=select_sound track=%u midi_note=%u name=%s\n",
+                  editor.selectedTrack() + 1, sound.midiNote, sound.name);
+    return;
+  }
+
+  if (M5.BtnC.isPressed()) return;
 
   const CalculatorCommand command = commandForCalculatorValue(value);
   if (command.type == CalculatorCommandType::SelectTrack) {
@@ -98,8 +114,15 @@ void reportCoreButtons() {
     Serial.println("core_button: name=a action=released");
     view.drawFooter(editor, ControlLayer::Default);
   }
-  if (M5.BtnB.wasPressed()) Serial.println("core_button: name=b action=pressed");
-  if (M5.BtnB.wasReleased()) Serial.println("core_button: name=b action=released");
+  if (M5.BtnB.wasPressed()) {
+    Serial.println("core_button: name=b action=pressed");
+    view.drawFooter(editor, ControlLayer::Sound);
+  }
+  if (M5.BtnB.wasReleased()) {
+    Serial.println("core_button: name=b action=released");
+    view.drawFooter(editor, M5.BtnA.isPressed() ? ControlLayer::Settings
+                                                : ControlLayer::Default);
+  }
   if (M5.BtnC.wasPressed()) Serial.println("core_button: name=c action=pressed");
   if (M5.BtnC.wasReleased()) {
     Serial.println("core_button: name=c action=released");
@@ -113,7 +136,7 @@ void triggerCurrentStep() {
   for (uint8_t track = 0; track < TRACK_COUNT; track++) {
     if (editor.stepActive(track, editor.currentStep())) {
       if (!hasTrigger) audioGate.wake(DRUM_TAIL_MS);
-      drumSlot.noteOn(TRACK_MIDI_NOTES[track], DRUM_VELOCITY);
+      drumSlot.noteOn(editor.soundForTrack(track).midiNote, DRUM_VELOCITY);
       hasTrigger = true;
     }
   }

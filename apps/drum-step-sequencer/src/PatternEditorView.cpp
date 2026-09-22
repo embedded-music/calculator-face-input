@@ -102,12 +102,20 @@ void PatternEditorView::drawFooter(const PatternEditorState& state,
     display_.print("A: - + volume   / * tempo");
     return;
   }
+  if (layer == ControlLayer::Sound) {
+    const DrumSound& sound = state.selectedSound();
+    display_.printf("SOUND   T%u   GM note %u", state.selectedTrack() + 1,
+                    sound.midiNote);
+    display_.setCursor(7, 222);
+    display_.printf("B + Calculator key: %s", sound.name);
+    return;
+  }
 
   display_.printf("BPM %u   volume %u / 255", state.tempoBpm(),
                   state.speakerVolume());
   display_.setTextColor(COLOR_MUTED_TEXT, COLOR_BACKGROUND);
   display_.setCursor(7, 222);
-  display_.print("Hold A: - + vol   / * tempo");
+  display_.print("Hold A: settings   B: sound");
 }
 
 void PatternEditorView::draw(const PatternEditorState& state) {
