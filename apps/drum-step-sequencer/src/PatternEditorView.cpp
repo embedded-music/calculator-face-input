@@ -95,16 +95,11 @@ void PatternEditorView::drawFooter(const PatternEditorState& state,
   display_.setTextSize(1);
   display_.setTextColor(COLOR_TEXT, COLOR_BACKGROUND);
   display_.setCursor(7, 207);
-  if (layer == ControlLayer::Mix) {
-    display_.printf("MIX   volume %u / 255", state.speakerVolume());
+  if (layer == ControlLayer::Settings) {
+    display_.printf("SET   vol %u   tempo %u", state.speakerVolume(),
+                    state.tempoBpm());
     display_.setCursor(7, 222);
-    display_.print("Hold A + Calculator - / +");
-    return;
-  }
-  if (layer == ControlLayer::Transport) {
-    display_.printf("TRANSPORT   tempo %u BPM", state.tempoBpm());
-    display_.setCursor(7, 222);
-    display_.print("Hold C + Calculator - / +");
+    display_.print("A: - + volume   / * tempo");
     return;
   }
 
@@ -112,7 +107,7 @@ void PatternEditorView::drawFooter(const PatternEditorState& state,
                   state.speakerVolume());
   display_.setTextColor(COLOR_MUTED_TEXT, COLOR_BACKGROUND);
   display_.setCursor(7, 222);
-  display_.print("Hold A: volume   Hold C: tempo");
+  display_.print("Hold A: - + vol   / * tempo");
 }
 
 void PatternEditorView::draw(const PatternEditorState& state) {

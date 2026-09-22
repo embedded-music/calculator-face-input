@@ -43,24 +43,26 @@ bool readCalculatorByte(uint8_t& value) {
 
 void handleCalculatorValue(uint8_t value) {
   if (M5.BtnA.isPressed()) {
-    if (value == '-') editor.decreaseVolume();
-    else if (value == '+') editor.increaseVolume();
-    else return;
-    M5.Speaker.setVolume(editor.speakerVolume());
-    view.drawFooter(editor, ControlLayer::Mix);
+    if (value == '-') {
+      editor.decreaseVolume();
+      M5.Speaker.setVolume(editor.speakerVolume());
+    } else if (value == '+') {
+      editor.increaseVolume();
+      M5.Speaker.setVolume(editor.speakerVolume());
+    } else if (value == '/') {
+      editor.decreaseTempo();
+      stepClock.setInterval(60000UL / (editor.tempoBpm() * 4UL));
+    } else if (value == '*') {
+      editor.increaseTempo();
+      stepClock.setInterval(60000UL / (editor.tempoBpm() * 4UL));
+    } else {
+      return;
+    }
+    view.drawFooter(editor, ControlLayer::Settings);
     return;
   }
 
-  if (M5.BtnC.isPressed()) {
-    if (value == '-') editor.decreaseTempo();
-    else if (value == '+') editor.increaseTempo();
-    else return;
-    stepClock.setInterval(60000UL / (editor.tempoBpm() * 4UL));
-    view.drawFooter(editor, ControlLayer::Transport);
-    return;
-  }
-
-  if (M5.BtnB.isPressed()) return;
+  if (M5.BtnB.isPressed() || M5.BtnC.isPressed()) return;
 
   const CalculatorCommand command = commandForCalculatorValue(value);
   if (command.type == CalculatorCommandType::SelectTrack) {
@@ -90,22 +92,18 @@ void handleCalculatorValue(uint8_t value) {
 void reportCoreButtons() {
   if (M5.BtnA.wasPressed()) {
     Serial.println("core_button: name=a action=pressed");
-    view.drawFooter(editor, ControlLayer::Mix);
+    view.drawFooter(editor, ControlLayer::Settings);
   }
   if (M5.BtnA.wasReleased()) {
     Serial.println("core_button: name=a action=released");
-    view.drawFooter(editor, M5.BtnC.isPressed() ? ControlLayer::Transport
-                                                : ControlLayer::Default);
+    view.drawFooter(editor, ControlLayer::Default);
   }
   if (M5.BtnB.wasPressed()) Serial.println("core_button: name=b action=pressed");
   if (M5.BtnB.wasReleased()) Serial.println("core_button: name=b action=released");
-  if (M5.BtnC.wasPressed()) {
-    Serial.println("core_button: name=c action=pressed");
-    view.drawFooter(editor, ControlLayer::Transport);
-  }
+  if (M5.BtnC.wasPressed()) Serial.println("core_button: name=c action=pressed");
   if (M5.BtnC.wasReleased()) {
     Serial.println("core_button: name=c action=released");
-    view.drawFooter(editor, M5.BtnA.isPressed() ? ControlLayer::Mix
+    view.drawFooter(editor, M5.BtnA.isPressed() ? ControlLayer::Settings
                                                 : ControlLayer::Default);
   }
 }
