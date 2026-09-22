@@ -97,7 +97,7 @@ void PatternEditorView::drawFooter() {
   display_.print("AC M % /: track   grid: toggle step");
   display_.setTextColor(COLOR_MUTED_TEXT, COLOR_BACKGROUND);
   display_.setCursor(7, 222);
-  display_.print("Core A/B/C reserved for later slices");
+  display_.print("T1: AMY drum 38   A/B/C: later");
 }
 
 void PatternEditorView::draw(const PatternEditorState& state) {

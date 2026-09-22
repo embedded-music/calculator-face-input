@@ -2,6 +2,9 @@
 #include <M5Unified.h>
 #include <Wire.h>
 
+#include "AmyAudioActivityGate.h"
+#include "AmyM5SpeakerBridge.h"
+#include "AmySynthSlot.h"
 #include "CalculatorCommand.h"
 #include "PatternEditorState.h"
 #include "PatternEditorView.h"
@@ -13,10 +16,20 @@ constexpr uint8_t CALCULATOR_INTERRUPT_PIN = 5;
 constexpr uint32_t I2C_FREQUENCY_HZ = 100000;
 constexpr uint16_t TEMPO_BPM = 120;
 constexpr uint32_t STEP_INTERVAL_MS = 60000 / (TEMPO_BPM * 4);
+constexpr uint8_t AMY_SYNTH_ID = 1;
+constexpr uint8_t AMY_DRUM_VOICES = 1;
+constexpr uint16_t AMY_GM_DRUM_PATCH = 258;
+constexpr uint8_t TRACK_ONE_MIDI_NOTE = 38;
+constexpr float DRUM_VELOCITY = 1.0f;
+constexpr uint32_t DRUM_TAIL_MS = 1500;
+constexpr uint8_t SPEAKER_VOLUME = 128;
 
 PatternEditorState editor;
 PatternEditorView view(M5.Display);
 StepClock stepClock(STEP_INTERVAL_MS);
+AmyM5SpeakerBridge amyBridge;
+AmyAudioActivityGate audioGate(amyBridge);
+AmySynthSlot drumSlot;
 
 bool calculatorAcknowledges() {
   Wire.beginTransmission(CALCULATOR_I2C_ADDRESS);
@@ -65,19 +78,28 @@ void reportCoreButtons() {
   if (M5.BtnC.wasPressed()) Serial.println("core_button: name=c action=pressed");
   if (M5.BtnC.wasReleased()) Serial.println("core_button: name=c action=released");
 }
+
+void triggerCurrentStep() {
+  if (!editor.stepActive(0, editor.currentStep())) return;
+  audioGate.wake(DRUM_TAIL_MS);
+  drumSlot.noteOn(TRACK_ONE_MIDI_NOTE, DRUM_VELOCITY);
+}
 }  // namespace
 
 void setup() {
   Serial.begin(115200);
   delay(200);
   auto config = M5.config();
-  config.internal_spk = false;
+  config.internal_spk = true;
   config.internal_mic = false;
   M5.begin(config);
   M5.Display.setRotation(1);
   pinMode(CALCULATOR_INTERRUPT_PIN, INPUT_PULLUP);
   Wire.begin(21, 22, I2C_FREQUENCY_HZ);
   view.draw(editor);
+  amyBridge.begin();
+  M5.Speaker.setVolume(SPEAKER_VOLUME);
+  drumSlot.begin(AMY_SYNTH_ID, AMY_DRUM_VOICES, AMY_GM_DRUM_PATCH);
   stepClock.begin(millis());
   Serial.printf("drum_step_sequencer: calculator_detected=%s\n",
                 calculatorAcknowledges() ? "yes" : "no");
@@ -91,6 +113,7 @@ void loop() {
   if (elapsedSteps > 0) {
     const uint8_t previousStep = editor.currentStep();
     for (uint8_t count = 0; count < elapsedSteps; count++) editor.advanceStep();
+    triggerCurrentStep();
     view.drawPlayheadChange(editor, previousStep);
   }
 
@@ -99,5 +122,6 @@ void loop() {
     if (readCalculatorByte(value)) handleCalculatorValue(value);
     else Serial.println("calculator: read_error");
   }
+  audioGate.update(false);
   delay(1);
 }
