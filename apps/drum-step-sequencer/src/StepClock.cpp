@@ -5,6 +5,10 @@ void StepClock::begin(uint32_t nowMs) {
   started_ = true;
 }
 
+void StepClock::setInterval(uint32_t intervalMs) {
+  intervalMs_ = intervalMs;
+}
+
 uint8_t StepClock::elapsedSteps(uint32_t nowMs) {
   if (!started_) begin(nowMs);
 

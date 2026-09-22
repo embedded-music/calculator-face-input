@@ -14,19 +14,16 @@ namespace {
 constexpr uint8_t CALCULATOR_I2C_ADDRESS = 0x08;
 constexpr uint8_t CALCULATOR_INTERRUPT_PIN = 5;
 constexpr uint32_t I2C_FREQUENCY_HZ = 100000;
-constexpr uint16_t TEMPO_BPM = 120;
-constexpr uint32_t STEP_INTERVAL_MS = 60000 / (TEMPO_BPM * 4);
 constexpr uint8_t AMY_SYNTH_ID = 1;
 constexpr uint8_t AMY_DRUM_VOICES = 1;
 constexpr uint16_t AMY_GM_DRUM_PATCH = 258;
 constexpr uint8_t TRACK_MIDI_NOTES[TRACK_COUNT] = {38, 42, 46, 55};
 constexpr float DRUM_VELOCITY = 1.0f;
 constexpr uint32_t DRUM_TAIL_MS = 1500;
-constexpr uint8_t SPEAKER_VOLUME = 128;
 
 PatternEditorState editor;
 PatternEditorView view(M5.Display);
-StepClock stepClock(STEP_INTERVAL_MS);
+StepClock stepClock(60000 / (120 * 4));
 AmyM5SpeakerBridge amyBridge;
 AmyAudioActivityGate audioGate(amyBridge);
 AmySynthSlot drumSlot;
@@ -45,6 +42,26 @@ bool readCalculatorByte(uint8_t& value) {
 }
 
 void handleCalculatorValue(uint8_t value) {
+  if (M5.BtnA.isPressed()) {
+    if (value == '-') editor.decreaseVolume();
+    else if (value == '+') editor.increaseVolume();
+    else return;
+    M5.Speaker.setVolume(editor.speakerVolume());
+    view.drawFooter(editor, ControlLayer::Mix);
+    return;
+  }
+
+  if (M5.BtnC.isPressed()) {
+    if (value == '-') editor.decreaseTempo();
+    else if (value == '+') editor.increaseTempo();
+    else return;
+    stepClock.setInterval(60000UL / (editor.tempoBpm() * 4UL));
+    view.drawFooter(editor, ControlLayer::Transport);
+    return;
+  }
+
+  if (M5.BtnB.isPressed()) return;
+
   const CalculatorCommand command = commandForCalculatorValue(value);
   if (command.type == CalculatorCommandType::SelectTrack) {
     const uint8_t previousTrack = editor.selectedTrack();
@@ -71,12 +88,26 @@ void handleCalculatorValue(uint8_t value) {
 }
 
 void reportCoreButtons() {
-  if (M5.BtnA.wasPressed()) Serial.println("core_button: name=a action=pressed");
-  if (M5.BtnA.wasReleased()) Serial.println("core_button: name=a action=released");
+  if (M5.BtnA.wasPressed()) {
+    Serial.println("core_button: name=a action=pressed");
+    view.drawFooter(editor, ControlLayer::Mix);
+  }
+  if (M5.BtnA.wasReleased()) {
+    Serial.println("core_button: name=a action=released");
+    view.drawFooter(editor, M5.BtnC.isPressed() ? ControlLayer::Transport
+                                                : ControlLayer::Default);
+  }
   if (M5.BtnB.wasPressed()) Serial.println("core_button: name=b action=pressed");
   if (M5.BtnB.wasReleased()) Serial.println("core_button: name=b action=released");
-  if (M5.BtnC.wasPressed()) Serial.println("core_button: name=c action=pressed");
-  if (M5.BtnC.wasReleased()) Serial.println("core_button: name=c action=released");
+  if (M5.BtnC.wasPressed()) {
+    Serial.println("core_button: name=c action=pressed");
+    view.drawFooter(editor, ControlLayer::Transport);
+  }
+  if (M5.BtnC.wasReleased()) {
+    Serial.println("core_button: name=c action=released");
+    view.drawFooter(editor, M5.BtnA.isPressed() ? ControlLayer::Mix
+                                                : ControlLayer::Default);
+  }
 }
 
 void triggerCurrentStep() {
@@ -103,7 +134,7 @@ void setup() {
   Wire.begin(21, 22, I2C_FREQUENCY_HZ);
   view.draw(editor);
   amyBridge.begin();
-  M5.Speaker.setVolume(SPEAKER_VOLUME);
+  M5.Speaker.setVolume(editor.speakerVolume());
   drumSlot.begin(AMY_SYNTH_ID, AMY_DRUM_VOICES, AMY_GM_DRUM_PATCH);
   stepClock.begin(millis());
   Serial.printf("drum_step_sequencer: calculator_detected=%s\n",

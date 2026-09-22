@@ -7,6 +7,7 @@ class StepClock {
   explicit StepClock(uint32_t intervalMs) : intervalMs_(intervalMs) {}
 
   void begin(uint32_t nowMs);
+  void setInterval(uint32_t intervalMs);
   uint8_t elapsedSteps(uint32_t nowMs);
 
  private:

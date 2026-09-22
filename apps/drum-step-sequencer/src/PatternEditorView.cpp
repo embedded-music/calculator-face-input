@@ -88,16 +88,31 @@ void PatternEditorView::drawBeatMarkers() {
   }
 }
 
-void PatternEditorView::drawFooter() {
+void PatternEditorView::drawFooter(const PatternEditorState& state,
+                                   ControlLayer layer) {
   display_.fillRect(0, GRID_BOTTOM, display_.width(),
                     display_.height() - GRID_BOTTOM, COLOR_BACKGROUND);
   display_.setTextSize(1);
   display_.setTextColor(COLOR_TEXT, COLOR_BACKGROUND);
   display_.setCursor(7, 207);
-  display_.print("AC M % /: track   grid: toggle step");
+  if (layer == ControlLayer::Mix) {
+    display_.printf("MIX   volume %u / 255", state.speakerVolume());
+    display_.setCursor(7, 222);
+    display_.print("Hold A + Calculator - / +");
+    return;
+  }
+  if (layer == ControlLayer::Transport) {
+    display_.printf("TRANSPORT   tempo %u BPM", state.tempoBpm());
+    display_.setCursor(7, 222);
+    display_.print("Hold C + Calculator - / +");
+    return;
+  }
+
+  display_.printf("BPM %u   volume %u / 255", state.tempoBpm(),
+                  state.speakerVolume());
   display_.setTextColor(COLOR_MUTED_TEXT, COLOR_BACKGROUND);
   display_.setCursor(7, 222);
-  display_.print("AMY: 38 42 46 55   A/B/C: later");
+  display_.print("Hold A: volume   Hold C: tempo");
 }
 
 void PatternEditorView::draw(const PatternEditorState& state) {
@@ -106,6 +121,6 @@ void PatternEditorView::draw(const PatternEditorState& state) {
   drawHeader();
   drawBeatMarkers();
   for (uint8_t track = 0; track < TRACK_COUNT; track++) drawTrack(state, track);
-  drawFooter();
+  drawFooter(state, ControlLayer::Default);
   display_.endWrite();
 }

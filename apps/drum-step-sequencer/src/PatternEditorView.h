@@ -4,6 +4,8 @@
 
 #include "PatternEditorState.h"
 
+enum class ControlLayer : uint8_t { Default, Mix, Transport };
+
 class PatternEditorView {
  public:
   explicit PatternEditorView(M5GFX& display) : display_(display) {}
@@ -12,13 +14,13 @@ class PatternEditorView {
   void drawStep(const PatternEditorState& state, uint8_t track, uint8_t step);
   void drawPlayheadChange(const PatternEditorState& state,
                           uint8_t previousStep);
+  void drawFooter(const PatternEditorState& state, ControlLayer layer);
 
  private:
   int16_t cellWidth() const;
   int16_t rowHeight() const;
   void drawHeader();
   void drawBeatMarkers();
-  void drawFooter();
 
   M5GFX& display_;
 };
