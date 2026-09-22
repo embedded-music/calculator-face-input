@@ -42,8 +42,8 @@ Each Core button has one short and one long gesture:
 | Button | Short press | Hold |
 | --- | --- | --- |
 | A | mute/unmute selected track | mute/unmute all tracks |
-| B | clear selected track | clear current section |
-| C | queue next section | queue previous section |
+| B | clear selected track | clear current pattern |
+| C | queue next pattern | queue previous pattern |
 
 Short actions are recognized only when the button is released. Crossing the
 hold threshold executes only the long action; the later release must not also
@@ -53,30 +53,30 @@ clear operations.
 The sequencer starts playing at boot and remains clocked continuously. There is
 no play/stop command in the initial interaction.
 
-## Sections
+## Patterns
 
-One section contains four tracks of sixteen steps. Storage has a fixed embedded
-capacity, initially proposed as eight sections, while the number of sections
+One pattern contains four tracks of sixteen steps. Storage has a fixed embedded
+capacity, initially proposed as eight patterns, while the number of patterns
 revealed to the performer grows with use. No dynamic allocation is needed in
 the event or audio paths.
 
-The section model follows these invariants:
+The pattern model follows these invariants:
 
-- at least one section always exists;
-- created sections form a contiguous sequence;
-- a new section is created only when advancing from the non-empty last section;
-- a last section with no active steps does not allow further advancement;
-- clearing a section never removes it;
-- an empty intermediate section does not block navigation to later sections;
-- mute state does not affect whether a section is considered empty;
+- at least one pattern always exists;
+- created patterns form a contiguous sequence;
+- a new pattern is created only when advancing from the non-empty last pattern;
+- a last pattern with no active steps does not allow further advancement;
+- clearing a pattern never removes it;
+- an empty intermediate pattern does not block navigation to later patterns;
+- mute state does not affect whether a pattern is considered empty;
 - reaching fixed capacity prevents further creation and is shown as `MAX`.
 
-Advancing from a non-empty final section creates one empty section and queues
-it. Section changes become audible only at a sixteen-step boundary. Until a
-change is queued, the current section loops. The display should distinguish
-the currently playing section from a queued destination.
+Advancing from a non-empty final pattern creates one empty pattern and queues
+it. Pattern changes become audible only at a sixteen-step boundary. Until a
+change is queued, the current pattern loops. The display should distinguish
+the currently playing pattern from a queued destination.
 
-There is intentionally no remove-section command. A cleared last section simply
+There is intentionally no remove-pattern command. A cleared last pattern simply
 becomes the available space for new composition, avoiding hidden destructive
 gestures and unnecessary storage management.
 
@@ -89,7 +89,7 @@ input surface. At minimum it shows:
 - the currently selected track;
 - the current playhead step;
 - per-track and global mute state;
-- current and queued section numbers;
+- current and queued pattern numbers;
 - fixed tempo and capacity feedback such as `MAX`.
 
 The first implementation can use a fixed tempo, proposed as 120 BPM. Tempo,
@@ -100,7 +100,7 @@ questions rather than requirements for the baseline.
 
 The app may initially keep its clock, patterns, UI policy, and AMY integration
 local. Calculator bytes are hardware facts; their meaning as tracks and steps
-belongs to this app. Section navigation is a composition interaction, not yet
+belongs to this app. Pattern navigation is a composition interaction, not yet
 a MIDI Bank Select equivalent or shared umbrella contract.
 
 A reusable sequencer or paged-selection contract should be extracted only if a
@@ -136,7 +136,7 @@ Implementation should proceed in hardware-testable slices:
    render budget on hardware.
 5. **Core gestures:** add short/hold discrimination for mute and clear without
    double execution on release.
-6. **Sections:** add fixed-capacity, incrementally revealed sections and
+6. **Patterns:** add fixed-capacity, incrementally revealed patterns and
    boundary-quantized navigation.
 
 Each slice should build and receive its stated Core Gray validation before the

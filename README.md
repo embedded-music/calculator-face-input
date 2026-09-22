@@ -22,7 +22,7 @@ observed.
 
 A self-contained four-track, sixteen-step drum sequencer for the Calculator
 Face and Core Gray speaker. The Calculator selects tracks and toggles steps;
-the Core buttons provide mute, clear, and section navigation gestures. It will
+the Core buttons provide mute, clear, and pattern navigation gestures. It will
 run continuously without requiring an external MIDI controller. See
 [`docs/devlog/002-drum-step-sequencer-plan.md`](docs/devlog/002-drum-step-sequencer-plan.md)
 for the interaction and incremental validation plan.
