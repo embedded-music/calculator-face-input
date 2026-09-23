@@ -8,7 +8,7 @@
 #include "CalculatorCommand.h"
 #include "PatternEditorState.h"
 #include "PatternEditorView.h"
-#include "StepClock.h"
+#include "DeadlineClock.h"
 
 namespace {
 constexpr uint8_t CALCULATOR_I2C_ADDRESS = 0x08;
@@ -22,10 +22,18 @@ constexpr uint32_t DRUM_TAIL_MS = 1500;
 
 PatternEditorState editor;
 PatternEditorView view(M5.Display);
-StepClock stepClock(60000 / (120 * 4));
+DeadlineClock stepClock;
 AmyM5SpeakerBridge amyBridge;
 AmyAudioActivityGate audioGate(amyBridge);
 AmySynthSlot drumSlot;
+
+bool rescheduleStepClock(uint64_t nowUs) {
+  const bool rescheduled = stepClock.reschedule(
+      nowUs, 60000000ULL / (editor.tempoBpm() * 4ULL),
+      IntervalChangePolicy::PreservePhase);
+  if (!rescheduled) Serial.println("clock: reschedule_failed");
+  return rescheduled;
+}
 
 bool calculatorAcknowledges() {
   Wire.beginTransmission(CALCULATOR_I2C_ADDRESS);
@@ -40,7 +48,7 @@ bool readCalculatorByte(uint8_t& value) {
   return true;
 }
 
-void handleCalculatorValue(uint8_t value) {
+void handleCalculatorValue(uint8_t value, uint64_t nowUs) {
   if (M5.BtnA.isPressed()) {
     if (value == '-') {
       editor.decreaseVolume();
@@ -50,10 +58,10 @@ void handleCalculatorValue(uint8_t value) {
       M5.Speaker.setVolume(editor.speakerVolume());
     } else if (value == '/') {
       editor.decreaseTempo();
-      stepClock.setInterval(60000UL / (editor.tempoBpm() * 4UL));
+      rescheduleStepClock(nowUs);
     } else if (value == '*') {
       editor.increaseTempo();
-      stepClock.setInterval(60000UL / (editor.tempoBpm() * 4UL));
+      rescheduleStepClock(nowUs);
     } else {
       return;
     }
@@ -157,7 +165,10 @@ void setup() {
   amyBridge.begin();
   M5.Speaker.setVolume(editor.speakerVolume());
   drumSlot.begin(AMY_SYNTH_ID, AMY_DRUM_VOICES, AMY_GM_DRUM_PATCH);
-  stepClock.begin(millis());
+  const bool clockStarted = stepClock.begin(
+      static_cast<uint64_t>(micros()),
+      60000000ULL / (editor.tempoBpm() * 4ULL));
+  if (!clockStarted) Serial.println("clock: begin_failed");
   Serial.printf("drum_step_sequencer: calculator_detected=%s\n",
                 calculatorAcknowledges() ? "yes" : "no");
 }
@@ -166,17 +177,20 @@ void loop() {
   M5.update();
   reportCoreButtons();
 
-  const uint8_t elapsedSteps = stepClock.elapsedSteps(millis());
+  const uint64_t nowUs = static_cast<uint64_t>(micros());
+  const uint32_t elapsedSteps = stepClock.poll(nowUs).elapsed_events;
   if (elapsedSteps > 0) {
     const uint8_t previousStep = editor.currentStep();
-    for (uint8_t count = 0; count < elapsedSteps; count++) editor.advanceStep();
+    for (uint32_t count = 0; count < elapsedSteps; count++) {
+      editor.advanceStep();
+    }
     triggerCurrentStep();
     view.drawPlayheadChange(editor, previousStep);
   }
 
   if (digitalRead(CALCULATOR_INTERRUPT_PIN) == LOW) {
     uint8_t value = 0;
-    if (readCalculatorByte(value)) handleCalculatorValue(value);
+    if (readCalculatorByte(value)) handleCalculatorValue(value, nowUs);
     else Serial.println("calculator: read_error");
   }
   audioGate.update(false);
