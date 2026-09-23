@@ -46,18 +46,26 @@ void PatternEditorView::drawStep(const PatternEditorState& state,
                                                        : COLOR_STEP_OFF;
   display_.fillRect(x + 2, y + 5, cellWidth() - 4, rowHeight() - 10, fill);
   display_.drawRect(x + 1, y + 4, cellWidth() - 2, rowHeight() - 8, border);
-  if (step == state.currentStep()) {
-    display_.fillRect(x + cellWidth() / 2 - 1, y + 7, 3,
-                      rowHeight() - 14, COLOR_PLAYHEAD);
-  }
+  if (step == state.currentStep()) drawPlayheadIndicator(state, track, step, true);
+}
+
+void PatternEditorView::drawPlayheadIndicator(const PatternEditorState& state,
+                                               uint8_t track, uint8_t step,
+                                               bool visible) {
+  const int16_t x = LABEL_WIDTH + step * cellWidth();
+  const int16_t y = GRID_TOP + track * rowHeight();
+  const uint16_t fill = state.stepActive(track, step) ? COLOR_STEP_ON
+                                                       : COLOR_STEP_OFF;
+  display_.fillRect(x + 3, y + rowHeight() - 8, cellWidth() - 6, 3,
+                    visible ? COLOR_PLAYHEAD : fill);
 }
 
 void PatternEditorView::drawPlayheadChange(const PatternEditorState& state,
                                            uint8_t previousStep) {
   display_.startWrite();
   for (uint8_t track = 0; track < TRACK_COUNT; track++) {
-    drawStep(state, track, previousStep);
-    drawStep(state, track, state.currentStep());
+    drawPlayheadIndicator(state, track, previousStep, false);
+    drawPlayheadIndicator(state, track, state.currentStep(), true);
   }
   display_.endWrite();
 }

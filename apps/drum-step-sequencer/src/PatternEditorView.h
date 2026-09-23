@@ -21,6 +21,8 @@ class PatternEditorView {
   int16_t rowHeight() const;
   void drawHeader();
   void drawBeatMarkers();
+  void drawPlayheadIndicator(const PatternEditorState& state, uint8_t track,
+                             uint8_t step, bool visible);
 
   M5GFX& display_;
 };
