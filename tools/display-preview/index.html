@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Drum sequencer display preview</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family: system-ui, sans-serif;
+        background: #202124;
+        color: #eee;
+      }
+      body { margin: 2rem; }
+      button { margin-right: .5rem; padding: .45rem .8rem; }
+      svg { display: block; margin-top: 1rem; width: 640px; max-width: 100%; height: auto; image-rendering: pixelated; }
+      .hint { color: #aaa; max-width: 42rem; }
+    </style>
+  </head>
+  <body>
+    <h1>Drum sequencer display preview</h1>
+    <p class="hint">Logical display: 320 × 240. This is a geometry and legibility
+      preview before implementing the layout with M5GFX.</p>
+    <p>
+      <button data-mode="pattern">Pattern</button>
+      <button data-mode="settings">Settings (A)</button>
+      <button data-mode="sounds">Sounds (B)</button>
+    </p>
+    <svg id="display" viewBox="0 0 320 240" role="img"
+         aria-label="Drum sequencer display preview"></svg>
+    <script>
+      const svg = document.querySelector("#display");
+      const NS = "http://www.w3.org/2000/svg";
+      const colors = {
+        bg: "#000", header: "#18c3", grid: "#4208", off: "#2104",
+        on: "#00ffff", selected: "#ffe000", playhead: "#ff00ff",
+        text: "#fff", muted: "#888", volume: "#35d9ff",
+        tempo: "#ffe04b", rate: "#ff72d2"
+      };
+      const keys = [
+        ["A", "M", "%", "/"],
+        ["7", "8", "9", "*"],
+        ["4", "5", "6", "-"],
+        ["1", "2", "3", "+"],
+        [".", "0", "+/-", "="]
+      ];
+      const sounds = [
+        "AC SNARE", "EL SNARE", "CLAP", "CLAVES", "C HIHAT",
+        "P HIHAT", "O HIHAT", "TAMBO", "VIBRA", "CUICA",
+        "SPLASH", "CHINESE", "RIDE 1", "RIDE 2", "RIDE BELL",
+        "COWBELL", "H AGOGO", "L AGOGO", "LOW TOM", "MARACAS"
+      ];
+
+      function node(name, attrs, parent = svg) {
+        const element = document.createElementNS(NS, name);
+        for (const [key, value] of Object.entries(attrs)) element.setAttribute(key, value);
+        parent.appendChild(element);
+        return element;
+      }
+
+      function text(value, x, y, size = 10, fill = colors.text, anchor = "start") {
+        const element = node("text", { x, y, fill, "font-size": size, "font-family": "monospace", "text-anchor": anchor });
+        element.textContent = value;
+        return element;
+      }
+
+      function frame(title, subtitle) {
+        node("rect", { width: 320, height: 240, fill: colors.bg });
+        node("rect", { x: 0, y: 0, width: 320, height: 34, fill: colors.header });
+        text(title, 8, 16, 12);
+      }
+
+      function keypad(highlights = {}, h = 29) {
+        const x0 = 8, y0 = 42, w = 74;
+        keys.forEach((row, rowIndex) => row.forEach((key, colIndex) => {
+          const x = x0 + colIndex * w, y = y0 + rowIndex * h;
+          const highlightColor = highlights[key];
+          const highlighted = Boolean(highlightColor);
+          node("rect", { x, y, width: w - 3, height: h - 3,
+            rx: 2, fill: highlighted ? highlightColor : colors.off,
+            stroke: highlighted ? colors.playhead : colors.grid, "stroke-width": 1 });
+          text(key, x + (w - 3) / 2, y + 17, 12,
+            highlighted ? colors.bg : colors.text, "middle");
+        }));
+      }
+
+      function renderPattern() {
+        frame("DRUM STEPS", "PATTERN 1");
+        const left = 34, top = 48, cellW = 17, rowH = 35;
+        for (let track = 0; track < 4; track++) {
+          text(`T${track + 1}`, 9, top + track * rowH + 22, 9);
+          for (let step = 0; step < 16; step++) {
+            const x = left + step * cellW, y = top + track * rowH;
+            const active = (track === 0 && step % 4 === 0) || (track === 1 && step % 4 === 2);
+            node("rect", { x, y, width: cellW - 2, height: rowH - 4,
+              fill: active ? colors.on : colors.off, stroke: colors.grid });
+            if (step === 5) node("rect", { x: x + 3, y: y + rowH - 8, width: cellW - 8, height: 3, fill: colors.playhead });
+          }
+        }
+        node("rect", { x: 0, y: 198, width: 320, height: 42, fill: colors.bg });
+        text("BPM 120   volume 128 / 255", 7, 214, 9);
+        text("Hold A: settings   B: sound", 7, 230, 8, colors.muted);
+      }
+
+      function renderSettings() {
+        frame("SETTINGS", "HOLD A TO CONTROL");
+        keypad({
+          "%": colors.volume, "/": colors.volume,
+          "9": colors.tempo, "*": colors.tempo,
+          "6": colors.rate, "-": colors.rate
+        }, 32);
+        const legend = [
+          ["VOLUME", "128", colors.volume],
+          ["TEMPO", "120 BPM", colors.tempo],
+          ["RATE", "1/16", colors.rate]
+        ];
+        legend.forEach(([label, value, color], index) => {
+          const x = 8 + index * 104;
+          node("rect", { x, y: 204, width: 96, height: 29, rx: 2, fill: color });
+          text(label, x + 5, 215, 8, colors.bg);
+          text(value, x + 5, 227, 12, colors.bg);
+        });
+      }
+
+      function renderSounds() {
+        frame("SOUNDS", "HOLD B TO SELECT A PATCH");
+        const x0 = 8, y0 = 42, w = 74, h = 27;
+        sounds.forEach((sound, index) => {
+          const row = Math.floor(index / 4), col = index % 4;
+          const x = x0 + col * w, y = y0 + row * h;
+          const selected = index === 6;
+          node("rect", { x, y, width: w - 3, height: h - 3, rx: 2,
+            fill: selected ? colors.selected : colors.off,
+            stroke: selected ? colors.playhead : colors.grid });
+          text(sound, x + (w - 3) / 2, y + 19, 8,
+            selected ? colors.bg : colors.text, "middle");
+        });
+        node("rect", { x: 0, y: 184, width: 320, height: 56, fill: colors.bg });
+        text("TRACK 2   CURRENT", 8, 198, 8, colors.muted);
+        text("Open Hi-Hat", 8, 214, 13);
+        text("B + calculator key selects one of 20 sounds", 8, 231, 8, colors.muted);
+      }
+
+      function render(mode) {
+        svg.replaceChildren();
+        if (mode === "settings") renderSettings();
+        else if (mode === "sounds") renderSounds();
+        else renderPattern();
+      }
+
+      document.querySelectorAll("button[data-mode]").forEach(button => {
+        button.addEventListener("click", () => render(button.dataset.mode));
+      });
+      render("pattern");
+    </script>
+  </body>
+</html>

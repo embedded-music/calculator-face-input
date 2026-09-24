@@ -50,26 +50,26 @@ bool readCalculatorByte(uint8_t& value) {
 
 void handleCalculatorValue(uint8_t value, uint64_t nowUs) {
   if (M5.BtnA.isPressed()) {
-    if (value == '-') {
+    if (value == '%') {
       editor.decreaseVolume();
       M5.Speaker.setVolume(editor.speakerVolume());
-    } else if (value == '+') {
+    } else if (value == '/') {
       editor.increaseVolume();
       M5.Speaker.setVolume(editor.speakerVolume());
-    } else if (value == '/') {
+    } else if (value == '9') {
       editor.decreaseTempo();
       rescheduleStepClock(nowUs);
     } else if (value == '*') {
       editor.increaseTempo();
       rescheduleStepClock(nowUs);
-    } else if (value == '%') {
+    } else if (value == '6') {
       if (editor.decreaseRate()) {
         rescheduleStepClock(nowUs);
         Serial.printf("control: action=adjust mode=rate direction=down "
                       "selected=%s\n",
                       editor.stepRateName());
       }
-    } else if (value == '9') {
+    } else if (value == '-') {
       if (editor.increaseRate()) {
         rescheduleStepClock(nowUs);
         Serial.printf("control: action=adjust mode=rate direction=up "
@@ -79,7 +79,7 @@ void handleCalculatorValue(uint8_t value, uint64_t nowUs) {
     } else {
       return;
     }
-    view.drawFooter(editor, ControlLayer::Settings);
+    view.drawSettingsValues(editor);
     return;
   }
 
@@ -93,7 +93,7 @@ void handleCalculatorValue(uint8_t value, uint64_t nowUs) {
     }
     if (soundIndex >= DRUM_SOUND_COUNT) return;
     editor.selectSound(soundIndex);
-    view.drawFooter(editor, ControlLayer::Sound);
+    view.drawSounds(editor);
     const DrumSound& sound = editor.selectedSound();
     Serial.printf("editor: action=select_sound track=%u midi_note=%u name=%s\n",
                   editor.selectedTrack() + 1, sound.midiNote, sound.name);
@@ -130,26 +130,26 @@ void handleCalculatorValue(uint8_t value, uint64_t nowUs) {
 void reportCoreButtons() {
   if (M5.BtnA.wasPressed()) {
     Serial.println("core_button: name=a action=pressed");
-    view.drawFooter(editor, ControlLayer::Settings);
+    view.drawSettings(editor);
   }
   if (M5.BtnA.wasReleased()) {
     Serial.println("core_button: name=a action=released");
-    view.drawFooter(editor, ControlLayer::Default);
+    view.draw(editor);
   }
   if (M5.BtnB.wasPressed()) {
     Serial.println("core_button: name=b action=pressed");
-    view.drawFooter(editor, ControlLayer::Sound);
+    view.drawSounds(editor);
   }
   if (M5.BtnB.wasReleased()) {
     Serial.println("core_button: name=b action=released");
-    view.drawFooter(editor, M5.BtnA.isPressed() ? ControlLayer::Settings
-                                                : ControlLayer::Default);
+    if (M5.BtnA.isPressed()) view.drawSettings(editor);
+    else view.draw(editor);
   }
   if (M5.BtnC.wasPressed()) Serial.println("core_button: name=c action=pressed");
   if (M5.BtnC.wasReleased()) {
     Serial.println("core_button: name=c action=released");
-    view.drawFooter(editor, M5.BtnA.isPressed() ? ControlLayer::Settings
-                                                : ControlLayer::Default);
+    if (M5.BtnA.isPressed()) view.drawSettings(editor);
+    else view.drawFooter(editor, ControlLayer::Default);
   }
 }
 
@@ -199,7 +199,11 @@ void loop() {
       editor.advanceStep();
     }
     triggerCurrentStep();
-    view.drawPlayheadChange(editor, previousStep);
+    // Modifier modals own the display while A or B is held. Keep the clock and
+    // audio running, but do not paint playhead stripes over those screens.
+    if (!M5.BtnA.isPressed() && !M5.BtnB.isPressed()) {
+      view.drawPlayheadChange(editor, previousStep);
+    }
   }
 
   if (digitalRead(CALCULATOR_INTERRUPT_PIN) == LOW) {

@@ -10,6 +10,9 @@ class PatternEditorView {
  public:
   explicit PatternEditorView(M5GFX& display) : display_(display) {}
   void draw(const PatternEditorState& state);
+  void drawSettings(const PatternEditorState& state);
+  void drawSettingsValues(const PatternEditorState& state);
+  void drawSounds(const PatternEditorState& state);
   void drawTrack(const PatternEditorState& state, uint8_t track);
   void drawStep(const PatternEditorState& state, uint8_t track, uint8_t step);
   void drawPlayheadChange(const PatternEditorState& state,

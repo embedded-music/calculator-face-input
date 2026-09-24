@@ -15,6 +15,15 @@ constexpr uint16_t COLOR_SELECTED = TFT_YELLOW;
 constexpr uint16_t COLOR_PLAYHEAD = TFT_MAGENTA;
 constexpr uint16_t COLOR_TEXT = TFT_WHITE;
 constexpr uint16_t COLOR_MUTED_TEXT = 0x8410;
+constexpr uint16_t COLOR_VOLUME = 0x2DDF;
+constexpr uint16_t COLOR_TEMPO = 0xFFE0;
+constexpr uint16_t COLOR_RATE = 0xF81F;
+constexpr const char* SOUND_LABELS[] = {
+    "AC SNARE", "EL SNARE", "CLAP",    "CLAVES",  "C HIHAT",
+    "P HIHAT",  "O HIHAT",  "TAMBO",   "VIBRA",    "CUICA",
+    "SPLASH",   "CHINESE",  "RIDE 1",  "RIDE 2",   "RIDE BELL",
+    "COWBELL",  "H AGOGO",  "L AGOGO", "LOW TOM",  "MARACAS",
+};
 }  // namespace
 
 int16_t PatternEditorView::cellWidth() const {
@@ -72,6 +81,7 @@ void PatternEditorView::drawPlayheadChange(const PatternEditorState& state,
 
 void PatternEditorView::drawTrack(const PatternEditorState& state,
                                   uint8_t track) {
+  constexpr const char* TRACK_KEYS[] = {"AC", "M", "%", "/"};
   const int16_t y = GRID_TOP + track * rowHeight();
   const bool selected = track == state.selectedTrack();
   display_.fillRect(0, y, LABEL_WIDTH, rowHeight(), COLOR_BACKGROUND);
@@ -79,11 +89,11 @@ void PatternEditorView::drawTrack(const PatternEditorState& state,
     display_.fillRect(3, y + 7, LABEL_WIDTH - 8, rowHeight() - 14,
                       COLOR_SELECTED);
   }
-  display_.setTextSize(1);
+  display_.setTextSize(2);
   display_.setTextColor(selected ? COLOR_BACKGROUND : COLOR_TEXT,
                         selected ? COLOR_SELECTED : COLOR_BACKGROUND);
-  display_.setCursor(9, y + 14);
-  display_.printf("T%u", track + 1);
+  display_.setCursor(7, y + 10);
+  display_.print(TRACK_KEYS[track]);
   for (uint8_t step = 0; step < STEP_COUNT; step++) drawStep(state, track, step);
 }
 
@@ -106,24 +116,20 @@ void PatternEditorView::drawFooter(const PatternEditorState& state,
   if (layer == ControlLayer::Settings) {
     display_.printf("SET vol %u tempo %u rate %s", state.speakerVolume(),
                     state.tempoBpm(), state.stepRateName());
-    display_.setCursor(7, 222);
-    display_.print("A: - + vol  / * tempo  % / 9 rate");
     return;
   }
   if (layer == ControlLayer::Sound) {
     const DrumSound& sound = state.selectedSound();
     display_.printf("SOUND   T%u   GM note %u", state.selectedTrack() + 1,
                     sound.midiNote);
-    display_.setCursor(7, 222);
-    display_.printf("B + Calculator key: %s", sound.name);
     return;
   }
 
-  display_.printf("BPM %u   volume %u / 255", state.tempoBpm(),
-                  state.speakerVolume());
-  display_.setTextColor(COLOR_MUTED_TEXT, COLOR_BACKGROUND);
-  display_.setCursor(7, 222);
-  display_.print("Hold A: settings   B: sound");
+  display_.setTextSize(2);
+  display_.setCursor(7, 209);
+  display_.printf("BPM %u  %s  vol %u%%", state.tempoBpm(),
+                  state.stepRateName(),
+                  (static_cast<uint16_t>(state.speakerVolume()) * 100) / 255);
 }
 
 void PatternEditorView::draw(const PatternEditorState& state) {
@@ -133,5 +139,150 @@ void PatternEditorView::draw(const PatternEditorState& state) {
   drawBeatMarkers();
   for (uint8_t track = 0; track < TRACK_COUNT; track++) drawTrack(state, track);
   drawFooter(state, ControlLayer::Default);
+  display_.endWrite();
+}
+
+void PatternEditorView::drawSettings(const PatternEditorState& state) {
+  constexpr const char* KEYS[5][4] = {
+      {"A", "M", "%", "/"},
+      {"7", "8", "9", "*"},
+      {"4", "5", "6", "-"},
+      {"1", "2", "3", "+"},
+      {".", "0", "+/-", "="},
+  };
+  constexpr int16_t KEY_X = 8;
+  constexpr int16_t KEY_Y = 42;
+  constexpr int16_t KEY_WIDTH = 74;
+  constexpr int16_t KEY_HEIGHT = 32;
+
+  display_.startWrite();
+  display_.fillScreen(COLOR_BACKGROUND);
+  display_.fillRect(0, 0, display_.width(), HEADER_HEIGHT, COLOR_HEADER);
+  display_.setTextSize(2);
+  display_.setTextColor(COLOR_TEXT, COLOR_HEADER);
+  display_.setCursor(8, 8);
+  display_.print("SETTINGS");
+
+  for (uint8_t row = 0; row < 5; row++) {
+    for (uint8_t column = 0; column < 4; column++) {
+      uint16_t fill = COLOR_STEP_OFF;
+      const char* key = KEYS[row][column];
+      if ((row == 0 && (column == 2 || column == 3))) fill = COLOR_VOLUME;
+      if ((row == 1 && (column == 2 || column == 3))) fill = COLOR_TEMPO;
+      if ((row == 2 && (column == 2 || column == 3))) fill = COLOR_RATE;
+
+      const int16_t x = KEY_X + column * KEY_WIDTH;
+      const int16_t y = KEY_Y + row * KEY_HEIGHT;
+      display_.fillRect(x, y, KEY_WIDTH - 3, KEY_HEIGHT - 3, fill);
+      display_.drawRect(x, y, KEY_WIDTH - 3, KEY_HEIGHT - 3,
+                        fill == COLOR_STEP_OFF ? COLOR_GRID : COLOR_PLAYHEAD);
+      display_.setTextColor(fill == COLOR_STEP_OFF ? COLOR_TEXT
+                                                   : COLOR_BACKGROUND,
+                            fill);
+      display_.setTextSize(2);
+      display_.setCursor(x + 31, y + 5);
+      display_.print(key);
+    }
+  }
+
+  constexpr int16_t LEGEND_Y = 204;
+  constexpr int16_t LEGEND_WIDTH = 96;
+  const uint16_t legendColors[] = {COLOR_VOLUME, COLOR_TEMPO, COLOR_RATE};
+  const char* legendLabels[] = {"VOLUME", "TEMPO", "RATE"};
+  const char* legendValues[] = {"128", "120 BPM", "1/16"};
+  for (uint8_t index = 0; index < 3; index++) {
+    const int16_t x = 8 + index * 104;
+    display_.fillRect(x, LEGEND_Y, LEGEND_WIDTH, 29, legendColors[index]);
+    display_.setTextColor(COLOR_BACKGROUND, legendColors[index]);
+    display_.setTextSize(1);
+    display_.setCursor(x + 5, LEGEND_Y + 4);
+    display_.print(legendLabels[index]);
+    display_.setTextSize(2);
+    display_.setCursor(x + 5, LEGEND_Y + 14);
+    if (index == 0) display_.printf("%u", state.speakerVolume());
+    if (index == 1) display_.printf("%u", state.tempoBpm());
+    if (index == 2) display_.print(state.stepRateName());
+  }
+
+  display_.endWrite();
+}
+
+void PatternEditorView::drawSettingsValues(const PatternEditorState& state) {
+  constexpr int16_t LEGEND_Y = 204;
+  constexpr int16_t LEGEND_WIDTH = 96;
+  const uint16_t legendColors[] = {COLOR_VOLUME, COLOR_TEMPO, COLOR_RATE};
+  const char* legendLabels[] = {"VOLUME", "TEMPO", "RATE"};
+
+  display_.startWrite();
+  for (uint8_t index = 0; index < 3; index++) {
+    const int16_t x = 8 + index * 104;
+    display_.fillRect(x, LEGEND_Y, LEGEND_WIDTH, 29, legendColors[index]);
+    display_.setTextColor(COLOR_BACKGROUND, legendColors[index]);
+    display_.setTextSize(1);
+    display_.setCursor(x + 5, LEGEND_Y + 4);
+    display_.print(legendLabels[index]);
+    display_.setTextSize(2);
+    display_.setCursor(x + 5, LEGEND_Y + 14);
+    if (index == 0) display_.printf("%u", state.speakerVolume());
+    if (index == 1) display_.printf("%u", state.tempoBpm());
+    if (index == 2) display_.print(state.stepRateName());
+  }
+  display_.endWrite();
+}
+
+void PatternEditorView::drawSounds(const PatternEditorState& state) {
+  constexpr const char* KEYS[5][4] = {
+      {"A", "M", "%", "/"},
+      {"7", "8", "9", "*"},
+      {"4", "5", "6", "-"},
+      {"1", "2", "3", "+"},
+      {".", "0", "+/-", "="},
+  };
+  constexpr int16_t KEY_X = 8;
+  constexpr int16_t KEY_Y = 42;
+  constexpr int16_t KEY_WIDTH = 74;
+  constexpr int16_t KEY_HEIGHT = 27;
+  constexpr int16_t FOOTER_Y = 184;
+
+  display_.startWrite();
+  display_.fillScreen(COLOR_BACKGROUND);
+  display_.fillRect(0, 0, display_.width(), HEADER_HEIGHT, COLOR_HEADER);
+  display_.setTextSize(2);
+  display_.setTextColor(COLOR_TEXT, COLOR_HEADER);
+  display_.setCursor(8, 8);
+  display_.print("SOUNDS");
+
+  for (uint8_t index = 0; index < DRUM_SOUND_COUNT; index++) {
+    const uint8_t row = index / 4;
+    const uint8_t column = index % 4;
+    const int16_t x = KEY_X + column * KEY_WIDTH;
+    const int16_t y = KEY_Y + row * KEY_HEIGHT;
+    const bool selected = index == state.selectedSoundIndex();
+    const uint16_t fill = selected ? COLOR_SELECTED : COLOR_STEP_OFF;
+    display_.fillRect(x, y, KEY_WIDTH - 3, KEY_HEIGHT - 3, fill);
+    display_.drawRect(x, y, KEY_WIDTH - 3, KEY_HEIGHT - 3,
+                      selected ? COLOR_PLAYHEAD : COLOR_GRID);
+    display_.setTextSize(1);
+    display_.setTextColor(selected ? COLOR_BACKGROUND : COLOR_TEXT, fill);
+    display_.setCursor(x + 4, y + 5);
+    display_.print(KEYS[row][column]);
+    display_.setCursor(x + (KEY_WIDTH - 3) / 2, y + 19);
+    display_.setTextColor(selected ? COLOR_BACKGROUND : COLOR_TEXT, fill);
+    display_.setTextDatum(MC_DATUM);
+    display_.drawString(SOUND_LABELS[index], x + (KEY_WIDTH - 3) / 2,
+                        y + 18);
+    display_.setTextDatum(TL_DATUM);
+  }
+
+  display_.fillRect(0, FOOTER_Y, display_.width(),
+                    display_.height() - FOOTER_Y, COLOR_BACKGROUND);
+  display_.setTextColor(COLOR_MUTED_TEXT, COLOR_BACKGROUND);
+  display_.setTextSize(1);
+  display_.setCursor(8, 198);
+  display_.printf("TRACK %u   CURRENT", state.selectedTrack() + 1);
+  display_.setTextColor(COLOR_TEXT, COLOR_BACKGROUND);
+  display_.setTextSize(2);
+  display_.setCursor(8, 207);
+  display_.print(state.selectedSound().name);
   display_.endWrite();
 }

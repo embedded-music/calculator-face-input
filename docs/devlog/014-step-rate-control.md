@@ -15,8 +15,10 @@ integer-microsecond interval together with the BPM. The available values are:
 1/16, 1/16T, 1/32, 1/32T
 ```
 
-The default remains `1/16`. While A is held, `%` selects the previous rate and
-`9` selects the next rate. `DeadlineClock` remains unaware of musical rates;
+The default remains `1/16`. While A is held, `6` selects the previous rate and
+`-` selects the next rate. The settings controls are grouped in the two right
+columns of the calculator layout: `%`/`÷` for volume, `9`/`×` for tempo, and
+`6`/`-` for rate. `DeadlineClock` remains unaware of musical rates;
 it receives only the resulting interval and preserves phase during changes.
 
 ## Verification
@@ -24,4 +26,3 @@ it receives only the resulting interval and preserves phase during changes.
 Build and flash the drum sequencer. Check that the default still produces a
 two-second 16-step pattern at 120 BPM, then cycle rates with A+% and A+9 and
 confirm that the playhead speed changes without resetting the pattern.
-
