@@ -90,33 +90,21 @@ void SequencerInput::handleCalculatorValue(uint8_t value, uint64_t nowUs) {
 
 void SequencerInput::reportCoreButtons() {
   if (M5.BtnA.wasPressed()) {
-    mode_ = UiMode::Settings;
+    mode_ = mode_ == UiMode::Settings ? UiMode::Pattern : UiMode::Settings;
     Serial.println("core_button: name=a action=pressed");
-    view_.drawSettings(editor_);
-  }
-  if (M5.BtnA.wasReleased()) {
-    mode_ = M5.BtnB.isPressed() ? UiMode::Sounds : UiMode::Pattern;
-    Serial.println("core_button: name=a action=released");
-    if (mode_ == UiMode::Sounds) view_.drawSounds(editor_);
+    if (mode_ == UiMode::Settings) view_.drawSettings(editor_);
     else view_.draw(editor_);
   }
   if (M5.BtnB.wasPressed()) {
-    mode_ = M5.BtnA.isPressed() ? UiMode::Settings : UiMode::Sounds;
+    mode_ = mode_ == UiMode::Sounds ? UiMode::Pattern : UiMode::Sounds;
     Serial.println("core_button: name=b action=pressed");
-    if (mode_ == UiMode::Settings) view_.drawSettings(editor_);
-    else view_.drawSounds(editor_);
-  }
-  if (M5.BtnB.wasReleased()) {
-    mode_ = M5.BtnA.isPressed() ? UiMode::Settings : UiMode::Pattern;
-    Serial.println("core_button: name=b action=released");
-    if (mode_ == UiMode::Settings) view_.drawSettings(editor_);
+    if (mode_ == UiMode::Sounds) view_.drawSounds(editor_);
     else view_.draw(editor_);
   }
   if (M5.BtnC.wasPressed()) {
+    mode_ = UiMode::Pattern;
     Serial.println("core_button: name=c action=pressed");
-  }
-  if (M5.BtnC.wasReleased()) {
-    Serial.println("core_button: name=c action=released");
+    view_.draw(editor_);
   }
 }
 

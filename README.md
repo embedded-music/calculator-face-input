@@ -49,10 +49,16 @@ Press a track key to select it. Press a step key to toggle that cell.
 
 ### Core buttons
 
-- Button **A** to open settings. Calculator keys adjust volume,
-  tempo, and step rate.
-- Button **B** to browse sounds for the selected track.
-- **C** is reserved for future pattern and transport interactions.
+- Press **A** to toggle the settings screen. Press it again to return to the
+  pattern.
+- Press **B** to toggle the sound browser for the selected track. Press it
+  again to return to the pattern.
+- Press **C** to return directly to the pattern screen from any mode.
+
+These are press toggles rather than hold modifiers, so the Calculator can be
+played with the other hand. Chords are not required by the current interface;
+C remains the home/escape button while future pattern and transport commands
+are explored.
 
 The display shows the active mode and the relevant Calculator key legend so
 the instrument remains discoverable without a separate controller.

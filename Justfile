@@ -2,6 +2,9 @@ set dotenv-load := true
 
 pio := "pio"
 
+default:
+    @just --list
+
 build-probe:
     {{pio}} run -e probe
 

@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <esp_timer.h>
 #include <M5Unified.h>
 #include <Wire.h>
 
@@ -59,7 +60,7 @@ void setup() {
   M5.Speaker.setVolume(editor.speakerVolume());
   drumSlot.begin(AMY_SYNTH_ID, AMY_DRUM_VOICES, AMY_GM_DRUM_PATCH);
   const bool clockStarted = stepClock.begin(
-      static_cast<uint64_t>(micros()), editor.stepIntervalUs());
+      static_cast<uint64_t>(esp_timer_get_time()), editor.stepIntervalUs());
   if (!clockStarted) Serial.println("clock: begin_failed");
   Serial.printf("drum_step_sequencer: calculator_detected=%s\n",
                 calculatorAcknowledges() ? "yes" : "no");
@@ -67,7 +68,7 @@ void setup() {
 
 void loop() {
   M5.update();
-  const uint64_t nowUs = static_cast<uint64_t>(micros());
+  const uint64_t nowUs = static_cast<uint64_t>(esp_timer_get_time());
   input.update(nowUs);
 
   const uint32_t elapsedSteps = stepClock.poll(nowUs).elapsed_intervals;
@@ -85,7 +86,7 @@ void loop() {
       Serial.printf("transport: skipped_steps count=%lu\n",
                     static_cast<unsigned long>(elapsedSteps));
     }
-    if (!M5.BtnA.isPressed() && !M5.BtnB.isPressed()) {
+    if (input.mode() == UiMode::Pattern) {
       view.drawPlayheadChange(editor, previousStep);
     }
   }
