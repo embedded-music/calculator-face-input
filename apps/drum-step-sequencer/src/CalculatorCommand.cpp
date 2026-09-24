@@ -18,3 +18,17 @@ CalculatorCommand commandForCalculatorValue(uint8_t value) {
   }
   return {};
 }
+
+bool soundIndexForCalculatorValue(uint8_t value, uint8_t& soundIndex) {
+  constexpr uint8_t soundValues[] = {
+      'A', 'M', '%', '/', '7', '8', '9', '*', '4', '5', '6', '-',
+      '1', '2', '3', '+', '.', '0', '`', '=',
+  };
+  for (uint8_t index = 0; index < sizeof(soundValues); index++) {
+    if (soundValues[index] == value) {
+      soundIndex = index;
+      return true;
+    }
+  }
+  return false;
+}

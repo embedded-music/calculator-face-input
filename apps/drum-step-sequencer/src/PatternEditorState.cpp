@@ -52,16 +52,20 @@ void PatternEditorState::advanceStep() {
   currentStep_ = (currentStep_ + 1) % STEP_COUNT;
 }
 
-void PatternEditorState::decreaseTempo() {
+bool PatternEditorState::decreaseTempo() {
+  const uint16_t previous = tempoBpm_;
   tempoBpm_ = tempoBpm_ > MIN_TEMPO_BPM + TEMPO_INCREMENT_BPM
                   ? tempoBpm_ - TEMPO_INCREMENT_BPM
                   : MIN_TEMPO_BPM;
+  return tempoBpm_ != previous;
 }
 
-void PatternEditorState::increaseTempo() {
+bool PatternEditorState::increaseTempo() {
+  const uint16_t previous = tempoBpm_;
   tempoBpm_ = tempoBpm_ < MAX_TEMPO_BPM - TEMPO_INCREMENT_BPM
                   ? tempoBpm_ + TEMPO_INCREMENT_BPM
                   : MAX_TEMPO_BPM;
+  return tempoBpm_ != previous;
 }
 
 bool PatternEditorState::decreaseRate() {
@@ -78,16 +82,20 @@ bool PatternEditorState::increaseRate() {
   return true;
 }
 
-void PatternEditorState::decreaseVolume() {
+bool PatternEditorState::decreaseVolume() {
+  const uint8_t previous = speakerVolume_;
   speakerVolume_ = speakerVolume_ > VOLUME_INCREMENT
                        ? speakerVolume_ - VOLUME_INCREMENT
                        : 0;
+  return speakerVolume_ != previous;
 }
 
-void PatternEditorState::increaseVolume() {
+bool PatternEditorState::increaseVolume() {
+  const uint8_t previous = speakerVolume_;
   speakerVolume_ = speakerVolume_ < UINT8_MAX - VOLUME_INCREMENT
                        ? speakerVolume_ + VOLUME_INCREMENT
                        : UINT8_MAX;
+  return speakerVolume_ != previous;
 }
 
 void PatternEditorState::selectSound(uint8_t soundIndex) {

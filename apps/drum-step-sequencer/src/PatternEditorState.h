@@ -44,12 +44,12 @@ class PatternEditorState {
   void selectTrack(uint8_t track);
   bool toggleStep(uint8_t step);
   void advanceStep();
-  void decreaseTempo();
-  void increaseTempo();
+  bool decreaseTempo();
+  bool increaseTempo();
   bool decreaseRate();
   bool increaseRate();
-  void decreaseVolume();
-  void increaseVolume();
+  bool decreaseVolume();
+  bool increaseVolume();
   void selectSound(uint8_t soundIndex);
 
  private:
