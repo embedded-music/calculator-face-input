@@ -70,7 +70,7 @@ void loop() {
   const uint64_t nowUs = static_cast<uint64_t>(micros());
   input.update(nowUs);
 
-  const uint32_t elapsedSteps = stepClock.poll(nowUs).elapsed_events;
+  const uint32_t elapsedSteps = stepClock.poll(nowUs).elapsed_intervals;
   if (elapsedSteps > 0) {
     const uint8_t previousStep = editor.currentStep();
     // Audio events whose deadlines are already in the past cannot be
