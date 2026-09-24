@@ -29,7 +29,7 @@ AmySynthSlot drumSlot;
 
 bool rescheduleStepClock(uint64_t nowUs) {
   const bool rescheduled = stepClock.reschedule(
-      nowUs, 60000000ULL / (editor.tempoBpm() * 4ULL),
+      nowUs, editor.stepIntervalUs(),
       IntervalChangePolicy::PreservePhase);
   if (!rescheduled) Serial.println("clock: reschedule_failed");
   return rescheduled;
@@ -62,6 +62,20 @@ void handleCalculatorValue(uint8_t value, uint64_t nowUs) {
     } else if (value == '*') {
       editor.increaseTempo();
       rescheduleStepClock(nowUs);
+    } else if (value == '%') {
+      if (editor.decreaseRate()) {
+        rescheduleStepClock(nowUs);
+        Serial.printf("control: action=adjust mode=rate direction=down "
+                      "selected=%s\n",
+                      editor.stepRateName());
+      }
+    } else if (value == '9') {
+      if (editor.increaseRate()) {
+        rescheduleStepClock(nowUs);
+        Serial.printf("control: action=adjust mode=rate direction=up "
+                      "selected=%s\n",
+                      editor.stepRateName());
+      }
     } else {
       return;
     }
@@ -167,7 +181,7 @@ void setup() {
   drumSlot.begin(AMY_SYNTH_ID, AMY_DRUM_VOICES, AMY_GM_DRUM_PATCH);
   const bool clockStarted = stepClock.begin(
       static_cast<uint64_t>(micros()),
-      60000000ULL / (editor.tempoBpm() * 4ULL));
+      editor.stepIntervalUs());
   if (!clockStarted) Serial.println("clock: begin_failed");
   Serial.printf("drum_step_sequencer: calculator_detected=%s\n",
                 calculatorAcknowledges() ? "yes" : "no");

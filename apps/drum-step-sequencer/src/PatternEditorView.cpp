@@ -104,10 +104,10 @@ void PatternEditorView::drawFooter(const PatternEditorState& state,
   display_.setTextColor(COLOR_TEXT, COLOR_BACKGROUND);
   display_.setCursor(7, 207);
   if (layer == ControlLayer::Settings) {
-    display_.printf("SET   vol %u   tempo %u", state.speakerVolume(),
-                    state.tempoBpm());
+    display_.printf("SET vol %u tempo %u rate %s", state.speakerVolume(),
+                    state.tempoBpm(), state.stepRateName());
     display_.setCursor(7, 222);
-    display_.print("A: - + volume   / * tempo");
+    display_.print("A: - + vol  / * tempo  % / 9 rate");
     return;
   }
   if (layer == ControlLayer::Sound) {
