@@ -1,5 +1,6 @@
 .pio/
 .pioenvs/
 .piolibdeps/
+.env
+.platformio-home/
 .vscode/
-

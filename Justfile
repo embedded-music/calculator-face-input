@@ -1,3 +1,5 @@
+set dotenv-load := true
+
 pio := "pio"
 
 build-probe:
