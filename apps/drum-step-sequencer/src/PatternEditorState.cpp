@@ -48,8 +48,10 @@ bool PatternEditorState::toggleStep(uint8_t step) {
   return active;
 }
 
-void PatternEditorState::advanceStep() {
-  currentStep_ = (currentStep_ + 1) % STEP_COUNT;
+void PatternEditorState::advanceByElapsedSteps(uint32_t elapsedSteps) {
+  if (elapsedSteps == 0) return;
+  currentStep_ = static_cast<uint8_t>(
+      (currentStep_ + (elapsedSteps % STEP_COUNT)) % STEP_COUNT);
 }
 
 bool PatternEditorState::decreaseTempo() {

@@ -73,10 +73,18 @@ void loop() {
   const uint32_t elapsedSteps = stepClock.poll(nowUs).elapsed_events;
   if (elapsedSteps > 0) {
     const uint8_t previousStep = editor.currentStep();
-    for (uint32_t count = 0; count < elapsedSteps; count++) {
-      editor.advanceStep();
+    // Audio events whose deadlines are already in the past cannot be
+    // recovered in real time. Advance the logical position to the present
+    // and discard all overdue triggers. When more than one event elapsed,
+    // wait for the next absolute deadline before emitting audio again; an
+    // immediate trigger here would compress the first interval after recovery.
+    editor.advanceByElapsedSteps(elapsedSteps);
+    if (elapsedSteps == 1) {
+      triggerCurrentStep();
+    } else {
+      Serial.printf("transport: skipped_steps count=%lu\n",
+                    static_cast<unsigned long>(elapsedSteps));
     }
-    triggerCurrentStep();
     if (!M5.BtnA.isPressed() && !M5.BtnB.isPressed()) {
       view.drawPlayheadChange(editor, previousStep);
     }

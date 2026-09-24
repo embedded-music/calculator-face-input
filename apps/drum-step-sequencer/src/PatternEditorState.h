@@ -43,7 +43,9 @@ class PatternEditorState {
   bool stepActive(uint8_t track, uint8_t step) const;
   void selectTrack(uint8_t track);
   bool toggleStep(uint8_t step);
-  void advanceStep();
+  // Move the logical playhead to the present after one or more deadlines.
+  // Missed steps are intentionally not replayed as audio bursts.
+  void advanceByElapsedSteps(uint32_t elapsedSteps);
   bool decreaseTempo();
   bool increaseTempo();
   bool decreaseRate();
