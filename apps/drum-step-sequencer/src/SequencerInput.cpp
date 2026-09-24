@@ -54,8 +54,9 @@ void SequencerInput::handleCalculatorValue(uint8_t value, uint64_t nowUs) {
   if (mode_ == UiMode::Sounds) {
     uint8_t soundIndex = 0;
     if (!soundIndexForCalculatorValue(value, soundIndex)) return;
+    const uint8_t previousSoundIndex = editor_.selectedSoundIndex();
     editor_.selectSound(soundIndex);
-    view_.drawSounds(editor_);
+    view_.drawSoundsSelection(editor_, previousSoundIndex);
     const DrumSound& sound = editor_.selectedSound();
     Serial.printf("editor: action=select_sound track=%u midi_note=%u name=%s\n",
                   editor_.selectedTrack() + 1, sound.midiNote, sound.name);

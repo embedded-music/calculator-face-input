@@ -192,44 +192,33 @@ void PatternEditorView::drawSettingsValues(const PatternEditorState& state) {
   display_.endWrite();
 }
 
-void PatternEditorView::drawSounds(const PatternEditorState& state) {
+void PatternEditorView::drawSoundCell(const PatternEditorState& state,
+                                       uint8_t soundIndex) {
   constexpr int16_t KEY_X = 8;
   constexpr int16_t KEY_Y = 42;
   constexpr int16_t KEY_WIDTH = 74;
   constexpr int16_t KEY_HEIGHT = 27;
+  const uint8_t row = soundIndex / 4;
+  const uint8_t column = soundIndex % 4;
+  const int16_t x = KEY_X + column * KEY_WIDTH;
+  const int16_t y = KEY_Y + row * KEY_HEIGHT;
+  const bool selected = soundIndex == state.selectedSoundIndex();
+  const uint16_t fill = selected ? COLOR_SELECTED : COLOR_STEP_OFF;
+  display_.fillRect(x, y, KEY_WIDTH - 3, KEY_HEIGHT - 3, fill);
+  display_.drawRect(x, y, KEY_WIDTH - 3, KEY_HEIGHT - 3,
+                    selected ? COLOR_PLAYHEAD : COLOR_GRID);
+  display_.setTextSize(1);
+  display_.setTextColor(selected ? COLOR_BACKGROUND : COLOR_TEXT, fill);
+  display_.setCursor(x + 4, y + 5);
+  display_.print(CALCULATOR_KEY_LABELS[row][column]);
+  display_.setTextDatum(MC_DATUM);
+  display_.drawString(DRUM_SOUNDS[soundIndex].displayName,
+                      x + (KEY_WIDTH - 3) / 2, y + 18);
+  display_.setTextDatum(TL_DATUM);
+}
+
+void PatternEditorView::drawSoundsFooter(const PatternEditorState& state) {
   constexpr int16_t FOOTER_Y = 184;
-
-  display_.startWrite();
-  display_.fillScreen(COLOR_BACKGROUND);
-  display_.fillRect(0, 0, display_.width(), HEADER_HEIGHT, COLOR_HEADER);
-  display_.setTextSize(2);
-  display_.setTextColor(COLOR_TEXT, COLOR_HEADER);
-  display_.setCursor(8, 8);
-  display_.print("SOUNDS");
-
-  for (uint8_t index = 0; index < DRUM_SOUND_COUNT; index++) {
-    const uint8_t row = index / 4;
-    const uint8_t column = index % 4;
-    const int16_t x = KEY_X + column * KEY_WIDTH;
-    const int16_t y = KEY_Y + row * KEY_HEIGHT;
-    const bool selected = index == state.selectedSoundIndex();
-    const uint16_t fill = selected ? COLOR_SELECTED : COLOR_STEP_OFF;
-    display_.fillRect(x, y, KEY_WIDTH - 3, KEY_HEIGHT - 3, fill);
-    display_.drawRect(x, y, KEY_WIDTH - 3, KEY_HEIGHT - 3,
-                      selected ? COLOR_PLAYHEAD : COLOR_GRID);
-    display_.setTextSize(1);
-    display_.setTextColor(selected ? COLOR_BACKGROUND : COLOR_TEXT, fill);
-    display_.setCursor(x + 4, y + 5);
-    display_.print(CALCULATOR_KEY_LABELS[row][column]);
-    display_.setCursor(x + (KEY_WIDTH - 3) / 2, y + 19);
-    display_.setTextColor(selected ? COLOR_BACKGROUND : COLOR_TEXT, fill);
-    display_.setTextDatum(MC_DATUM);
-    display_.drawString(DRUM_SOUNDS[index].displayName,
-                        x + (KEY_WIDTH - 3) / 2,
-                        y + 18);
-    display_.setTextDatum(TL_DATUM);
-  }
-
   display_.fillRect(0, FOOTER_Y, display_.width(),
                     display_.height() - FOOTER_Y, COLOR_BACKGROUND);
   display_.setTextColor(COLOR_MUTED_TEXT, COLOR_BACKGROUND);
@@ -240,5 +229,30 @@ void PatternEditorView::drawSounds(const PatternEditorState& state) {
   display_.setTextSize(2);
   display_.setCursor(8, 207);
   display_.print(state.selectedSound().name);
+}
+
+void PatternEditorView::drawSounds(const PatternEditorState& state) {
+  display_.startWrite();
+  display_.fillScreen(COLOR_BACKGROUND);
+  display_.fillRect(0, 0, display_.width(), HEADER_HEIGHT, COLOR_HEADER);
+  display_.setTextSize(2);
+  display_.setTextColor(COLOR_TEXT, COLOR_HEADER);
+  display_.setCursor(8, 8);
+  display_.print("SOUNDS");
+  for (uint8_t index = 0; index < DRUM_SOUND_COUNT; index++) {
+    drawSoundCell(state, index);
+  }
+  drawSoundsFooter(state);
+  display_.endWrite();
+}
+
+void PatternEditorView::drawSoundsSelection(
+    const PatternEditorState& state, uint8_t previousSoundIndex) {
+  display_.startWrite();
+  if (previousSoundIndex < DRUM_SOUND_COUNT) {
+    drawSoundCell(state, previousSoundIndex);
+  }
+  drawSoundCell(state, state.selectedSoundIndex());
+  drawSoundsFooter(state);
   display_.endWrite();
 }
