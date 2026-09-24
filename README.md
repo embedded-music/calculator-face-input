@@ -49,11 +49,9 @@ Press a track key to select it. Press a step key to toggle that cell.
 
 ### Core buttons
 
-- Hold **A** to open settings. While held, Calculator keys adjust volume,
+- Button **A** to open settings. Calculator keys adjust volume,
   tempo, and step rate.
-- Hold **B** to browse sounds for the selected track.
-- Holding **A+B** keeps the settings view active; this reserves the chord for
-  future mode cycling.
+- Button **B** to browse sounds for the selected track.
 - **C** is reserved for future pattern and transport interactions.
 
 The display shows the active mode and the relevant Calculator key legend so
