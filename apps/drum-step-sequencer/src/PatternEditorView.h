@@ -11,6 +11,7 @@ class PatternEditorView {
   void drawSettings(const PatternEditorState& state);
   void drawSettingsValues(const PatternEditorState& state);
   void drawSounds(const PatternEditorState& state);
+  void drawSoundsPatternChange(const PatternEditorState& state);
   void drawSoundsSelection(const PatternEditorState& state,
                            uint8_t previousSoundIndex);
   void drawArrangement(const PatternEditorState& state);

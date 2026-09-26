@@ -137,6 +137,16 @@ void PatternEditorView::drawSoundsSelection(const PatternEditorState& state,
   display_.endWrite();
 }
 
+void PatternEditorView::drawSoundsPatternChange(
+    const PatternEditorState& state) {
+  display_.startWrite();
+  for (uint8_t index = 0; index < DRUM_SOUND_COUNT; index++) {
+    drawSoundCell(state, index);
+  }
+  drawSoundsFooter(state);
+  display_.endWrite();
+}
+
 void PatternEditorView::drawArrangement(const PatternEditorState& state) {
   display_.startWrite();
   display_.fillScreen(COLOR_BACKGROUND);

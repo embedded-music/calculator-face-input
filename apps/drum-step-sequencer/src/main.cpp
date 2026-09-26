@@ -76,6 +76,8 @@ void loop() {
     if (input.mode() == UiMode::Pattern) {
       if (update.patternChanged) view.drawPatternChange(editor);
       else view.drawPlayheadChange(editor, update.previousStep);
+    } else if (update.patternChanged && input.mode() == UiMode::Sounds) {
+      view.drawSoundsPatternChange(editor);
     } else if (update.patternBoundary && input.mode() == UiMode::Arrangement) {
       view.drawArrangementValues(editor);
     }
