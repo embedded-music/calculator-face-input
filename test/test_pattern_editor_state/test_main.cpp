@@ -16,16 +16,16 @@ class FakeClock final : public SequencerClock {
   }
 };
 
-class FakeNoteSink final : public SequencerNoteSink {
+class FakeEventSink final : public SequencerEventSink {
  public:
   uint8_t wakeCount = 0;
   uint8_t noteCount = 0;
-  uint8_t lastNote = 0;
+  uint8_t lastSoundId = 0;
 
   void wake(uint32_t) override { wakeCount++; }
-  void noteOn(uint8_t midiNote, float) override {
+  void trigger(uint8_t soundId, float) override {
     noteCount++;
-    lastNote = midiNote;
+    lastSoundId = soundId;
   }
 };
 #include "../../apps/drum-step-sequencer/src/PatternEditorState.cpp"
@@ -169,12 +169,12 @@ void test_command_map_routes_each_mode_semantically() {
                               commandForMode(UiMode::Arrangement, '=').action));
 }
 
-void test_playback_with_fake_clock_and_note_sink() {
+void test_playback_with_fake_clock_and_event_sink() {
   PatternEditorState state;
   state.selectTrack(0);
   state.toggleStep(1);
   FakeClock clock;
-  FakeNoteSink sink;
+  FakeEventSink sink;
   SequencerPlayback playback(state, clock, sink);
 
   clock.nextElapsedSteps = 1;
@@ -182,7 +182,7 @@ void test_playback_with_fake_clock_and_note_sink() {
   TEST_ASSERT_EQUAL_UINT32(1, onTime.elapsedSteps);
   TEST_ASSERT_EQUAL_UINT8(1, sink.noteCount);
   TEST_ASSERT_EQUAL_UINT8(1, sink.wakeCount);
-  TEST_ASSERT_EQUAL_UINT8(state.soundForTrack(0).midiNote, sink.lastNote);
+  TEST_ASSERT_EQUAL_UINT8(state.soundForTrack(0).midiNote, sink.lastSoundId);
 
   clock.nextElapsedSteps = 3;
   const SequencerPlaybackUpdate late = playback.update(0);
@@ -200,6 +200,6 @@ int main() {
   RUN_TEST(test_playback_policy_triggers_only_on_time);
   RUN_TEST(test_playback_policy_reports_pattern_transition);
   RUN_TEST(test_command_map_routes_each_mode_semantically);
-  RUN_TEST(test_playback_with_fake_clock_and_note_sink);
+  RUN_TEST(test_playback_with_fake_clock_and_event_sink);
   return UNITY_END();
 }

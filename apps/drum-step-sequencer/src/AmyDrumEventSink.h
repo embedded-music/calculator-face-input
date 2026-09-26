@@ -2,16 +2,16 @@
 
 #include "AmyAudioActivityGate.h"
 #include "AmySynthSlot.h"
-#include "SequencerNoteSink.h"
+#include "SequencerEventSink.h"
 
-class AmyDrumNoteSink final : public SequencerNoteSink {
+class AmyDrumEventSink final : public SequencerEventSink {
  public:
-  AmyDrumNoteSink(AmyAudioActivityGate& audioGate, AmySynthSlot& drumSlot)
+  AmyDrumEventSink(AmyAudioActivityGate& audioGate, AmySynthSlot& drumSlot)
       : audioGate_(audioGate), drumSlot_(drumSlot) {}
 
   void wake(uint32_t tailMs) override { audioGate_.wake(tailMs); }
-  void noteOn(uint8_t midiNote, float velocity) override {
-    drumSlot_.noteOn(midiNote, velocity);
+  void trigger(uint8_t soundId, float velocity) override {
+    drumSlot_.noteOn(soundId, velocity);
   }
 
  private:

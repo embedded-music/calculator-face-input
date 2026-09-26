@@ -9,8 +9,8 @@ void SequencerPlayback::triggerCurrentStep() {
   bool hasTrigger = false;
   for (uint8_t track = 0; track < TRACK_COUNT; track++) {
     if (editor_.stepActive(track, editor_.currentStep())) {
-      if (!hasTrigger) noteSink_.wake(DRUM_TAIL_MS);
-      noteSink_.noteOn(editor_.soundForTrack(track).midiNote, DRUM_VELOCITY);
+      if (!hasTrigger) eventSink_.wake(DRUM_TAIL_MS);
+      eventSink_.trigger(editor_.soundForTrack(track).midiNote, DRUM_VELOCITY);
       hasTrigger = true;
     }
   }

@@ -12,7 +12,7 @@
 #include "PatternEditorState.h"
 #include "PatternEditorView.h"
 #include "SequencerInput.h"
-#include "AmyDrumNoteSink.h"
+#include "AmyDrumEventSink.h"
 #include "SequencerPlayback.h"
 
 namespace {
@@ -26,9 +26,9 @@ SequencerInput input(editor, view, stepClock);
 AmyM5SpeakerBridge amyBridge;
 AmyAudioActivityGate audioGate(amyBridge);
 AmySynthSlot drumSlot;
-AmyDrumNoteSink noteSink(audioGate, drumSlot);
+AmyDrumEventSink eventSink(audioGate, drumSlot);
 DeadlineClockAdapter playbackClock(stepClock);
-SequencerPlayback playback(editor, playbackClock, noteSink);
+SequencerPlayback playback(editor, playbackClock, eventSink);
 
 bool calculatorAcknowledges() {
   Wire.beginTransmission(CALCULATOR_I2C_ADDRESS);

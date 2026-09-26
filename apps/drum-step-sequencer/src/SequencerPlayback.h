@@ -5,7 +5,7 @@
 #include "PatternEditorState.h"
 #include "SequencerPlaybackPolicy.h"
 #include "SequencerClock.h"
-#include "SequencerNoteSink.h"
+#include "SequencerEventSink.h"
 
 struct SequencerPlaybackUpdate {
   uint32_t elapsedSteps = 0;
@@ -17,10 +17,10 @@ struct SequencerPlaybackUpdate {
 class SequencerPlayback {
  public:
   SequencerPlayback(PatternEditorState& editor, SequencerClock& stepClock,
-                    SequencerNoteSink& noteSink)
+                    SequencerEventSink& eventSink)
       : editor_(editor),
         stepClock_(stepClock),
-        noteSink_(noteSink) {}
+        eventSink_(eventSink) {}
 
   SequencerPlaybackUpdate update(uint64_t nowUs);
 
@@ -29,5 +29,5 @@ class SequencerPlayback {
 
   PatternEditorState& editor_;
   SequencerClock& stepClock_;
-  SequencerNoteSink& noteSink_;
+  SequencerEventSink& eventSink_;
 };

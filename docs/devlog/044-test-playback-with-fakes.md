@@ -8,7 +8,7 @@ Arduino, the M5 hardware, or AMY audio output.
 ## Design
 
 `SequencerPlayback` now consumes two small interfaces: `SequencerClock` and
-`SequencerNoteSink`. The firmware adapts the shared `DeadlineClock` through
+`SequencerEventSink`. The firmware adapts the shared `DeadlineClock` through
 `DeadlineClockAdapter`, while native tests provide a deterministic fake clock
 and a note sink that records wake and note-on calls.
 
