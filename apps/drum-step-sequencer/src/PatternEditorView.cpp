@@ -267,6 +267,25 @@ void PatternEditorView::drawArrangement(const PatternEditorState& state) {
   display_.setCursor(8, 8);
   display_.print("ARRANGEMENT");
 
+  drawArrangementValuesContent(state);
+
+  display_.setTextSize(1);
+  display_.setTextColor(COLOR_MUTED_TEXT, COLOR_BACKGROUND);
+  display_.setCursor(16, 190);
+  display_.print("AC   M   %   /   select next pattern");
+  display_.endWrite();
+}
+
+void PatternEditorView::drawArrangementValuesContent(
+    const PatternEditorState& state) {
+  constexpr int16_t VALUE_X = 16;
+  constexpr int16_t VALUE_WIDTH = 210;
+  constexpr int16_t VALUE_HEIGHT = 28;
+  constexpr int16_t VALUE_YS[] = {48, 88, 128};
+  for (int16_t y : VALUE_YS) {
+    display_.fillRect(VALUE_X - 4, y, VALUE_WIDTH, VALUE_HEIGHT,
+                      COLOR_BACKGROUND);
+  }
   display_.setTextColor(COLOR_TEXT, COLOR_BACKGROUND);
   display_.setCursor(16, 58);
   display_.printf("Current = %s", PATTERN_KEYS[state.currentPattern()]);
@@ -274,10 +293,11 @@ void PatternEditorView::drawArrangement(const PatternEditorState& state) {
   display_.printf("Next    = %s", PATTERN_KEYS[state.nextPattern()]);
   display_.setCursor(16, 138);
   display_.print("Clone   = off");
+}
 
-  display_.setTextSize(1);
-  display_.setTextColor(COLOR_MUTED_TEXT, COLOR_BACKGROUND);
-  display_.setCursor(16, 190);
-  display_.print("AC   M   %   /   select next pattern");
+void PatternEditorView::drawArrangementValues(
+    const PatternEditorState& state) {
+  display_.startWrite();
+  drawArrangementValuesContent(state);
   display_.endWrite();
 }

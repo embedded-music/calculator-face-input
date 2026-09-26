@@ -67,7 +67,7 @@ void SequencerInput::handleCalculatorValue(uint8_t value, uint64_t nowUs) {
     uint8_t patternIndex = 0;
     if (!patternIndexForCalculatorValue(value, patternIndex)) return;
     editor_.selectNextPattern(patternIndex);
-    view_.drawArrangement(editor_);
+    view_.drawArrangementValues(editor_);
     Serial.printf("arrangement: action=queue_pattern next=%u\n",
                   editor_.nextPattern() + 1);
     return;

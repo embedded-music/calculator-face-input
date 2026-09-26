@@ -14,6 +14,7 @@ class PatternEditorView {
   void drawSoundsSelection(const PatternEditorState& state,
                            uint8_t previousSoundIndex);
   void drawArrangement(const PatternEditorState& state);
+  void drawArrangementValues(const PatternEditorState& state);
   void drawTrack(const PatternEditorState& state, uint8_t track);
   void drawStep(const PatternEditorState& state, uint8_t track, uint8_t step);
   void drawPlayheadChange(const PatternEditorState& state,
@@ -28,6 +29,7 @@ class PatternEditorView {
   void drawSettingsLegends(const PatternEditorState& state);
   void drawSoundCell(const PatternEditorState& state, uint8_t soundIndex);
   void drawSoundsFooter(const PatternEditorState& state);
+  void drawArrangementValuesContent(const PatternEditorState& state);
   void drawPlayheadIndicator(const PatternEditorState& state, uint8_t track,
                              uint8_t step, bool visible);
 

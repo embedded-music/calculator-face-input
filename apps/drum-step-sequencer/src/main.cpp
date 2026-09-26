@@ -93,7 +93,7 @@ void loop() {
     if (input.mode() == UiMode::Pattern) {
       view.drawPlayheadChange(editor, previousStep);
     } else if (patternBoundary && input.mode() == UiMode::Arrangement) {
-      view.drawArrangement(editor);
+      view.drawArrangementValues(editor);
     }
   }
 
