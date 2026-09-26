@@ -58,6 +58,8 @@ Press a track key to select it. Press a step key to toggle that cell.
   chain positions: press their calculator keys to toggle positions on or off.
   The active positions, in grid order, form the chain. The current and
   upcoming chain positions are marked in the grid.
+  The **\*** cell toggles Clone mode; when it is ON, choosing a pattern first
+  copies the current pattern into that slot before queuing it.
 
 These are press toggles rather than hold modifiers, so the Calculator can be
 played with the other hand. Chords are not required by the current interface.

@@ -26,6 +26,11 @@ Turning off the currently playing position is quantized: it remains visibly
 current until the end of its sixteen-step cycle, while the next transition
 skips it. This avoids changing the active pattern in the middle of a cycle.
 
+The `*` cell is a persistent clone mode switch. With Clone OFF, selecting a
+pattern only queues it. With Clone ON, selecting a pattern first copies the
+current pattern's steps and sounds into that slot, then queues it. Clone mode
+does not change which chain positions are enabled.
+
 ## Verification
 
 - Build with `just build-sequencer`.

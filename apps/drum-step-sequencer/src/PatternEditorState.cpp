@@ -92,6 +92,11 @@ void PatternEditorState::selectNextPattern(uint8_t pattern) {
   nextPattern_ = pattern;
 }
 
+void PatternEditorState::cloneCurrentPatternTo(uint8_t pattern) {
+  if (pattern >= PATTERN_SLOT_COUNT) return;
+  patterns_[pattern] = patterns_[currentPattern_];
+}
+
 uint8_t PatternEditorState::chainPatternAt(uint8_t position) const {
   return position < CHAIN_MAX_LENGTH ? chain_[position] : 0;
 }

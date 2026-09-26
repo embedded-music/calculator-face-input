@@ -64,6 +64,13 @@ void SequencerInput::handleCalculatorValue(uint8_t value, uint64_t nowUs) {
   }
 
   if (mode_ == UiMode::Arrangement) {
+    if (value == '*') {
+      editor_.toggleCloneMode();
+      view_.drawArrangementValues(editor_);
+      Serial.printf("arrangement: action=clone_mode value=%s\n",
+                    editor_.cloneMode() ? "on" : "off");
+      return;
+    }
     const uint8_t chainValues[] = {
         '7', '8', '9', '4', '5', '6', '1', '2', '3', '.', '0', '`'};
     for (uint8_t position = 0; position < CHAIN_MAX_LENGTH; position++) {
@@ -83,6 +90,11 @@ void SequencerInput::handleCalculatorValue(uint8_t value, uint64_t nowUs) {
     }
     uint8_t patternIndex = 0;
     if (!patternIndexForCalculatorValue(value, patternIndex)) return;
+    if (editor_.cloneMode()) {
+      editor_.cloneCurrentPatternTo(patternIndex);
+      Serial.printf("arrangement: action=clone_pattern source=%u target=%u\n",
+                    editor_.currentPattern() + 1, patternIndex + 1);
+    }
     editor_.selectNextPattern(patternIndex);
     view_.drawArrangementValues(editor_);
     Serial.printf("arrangement: action=queue_pattern next=%u\n",

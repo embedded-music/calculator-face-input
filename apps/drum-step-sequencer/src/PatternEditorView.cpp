@@ -304,6 +304,9 @@ void PatternEditorView::drawArrangementValuesContent(
         fill = COLOR_SELECTED;
         border = state.nextPattern() == column ? COLOR_PLAYHEAD : COLOR_GRID;
         label = PATTERN_KEYS[column];
+      } else if (row == 1 && column == 3) {
+        label = state.cloneMode() ? "Clone ON" : "Clone OFF";
+        if (state.cloneMode()) fill = COLOR_TEXT;
       } else if (column < 3) {
         chainCell = true;
         chainPosition = static_cast<uint8_t>((row - 1) * 3 + column);
@@ -317,7 +320,7 @@ void PatternEditorView::drawArrangementValuesContent(
 
       display_.fillRect(x, y, KEY_WIDTH - 3, KEY_HEIGHT - 3, fill);
       display_.drawRect(x, y, KEY_WIDTH - 3, KEY_HEIGHT - 3, border);
-      display_.setTextSize(2);
+      display_.setTextSize(row == 1 && column == 3 ? 1 : 2);
       display_.setTextColor(fill == COLOR_STEP_OFF ? COLOR_TEXT
                                                    : COLOR_BACKGROUND,
                             fill);

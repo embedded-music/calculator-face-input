@@ -34,6 +34,7 @@ class PatternEditorState {
   uint8_t currentStep() const { return currentStep_; }
   uint8_t currentPattern() const { return currentPattern_; }
   uint8_t nextPattern() const { return nextPattern_; }
+  bool cloneMode() const { return cloneMode_; }
   uint8_t chainLength() const { return chainLength_; }
   uint8_t chainPosition() const { return chainPosition_; }
   uint8_t nextChainPosition() const { return nextEnabledPosition(chainPosition_); }
@@ -64,6 +65,8 @@ class PatternEditorState {
   bool advanceByElapsedSteps(uint32_t elapsedSteps);
   bool patternChangedAtBoundary() const { return patternChangedAtBoundary_; }
   void selectNextPattern(uint8_t pattern);
+  void cloneCurrentPatternTo(uint8_t pattern);
+  void toggleCloneMode() { cloneMode_ = !cloneMode_; }
   bool toggleChainPosition(uint8_t position);
   bool decreaseTempo();
   bool increaseTempo();
@@ -89,6 +92,7 @@ class PatternEditorState {
   uint8_t chainLength_ = CHAIN_MIN_LENGTH;
   uint8_t chainPosition_ = 0;
   bool patternChangedAtBoundary_ = false;
+  bool cloneMode_ = false;
   uint16_t tempoBpm_ = 120;
   StepRate stepRate_ = StepRate::Sixteenth;
   uint8_t speakerVolume_ = 128;
