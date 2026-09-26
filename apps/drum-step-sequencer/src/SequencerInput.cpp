@@ -71,6 +71,14 @@ void SequencerInput::handleCalculatorValue(uint8_t value, uint64_t nowUs) {
                     editor_.cloneMode() ? "on" : "off");
       return;
     }
+    if (value == '=') {
+      const uint8_t targetPattern = editor_.nextPattern();
+      editor_.clearPattern(targetPattern);
+      view_.drawArrangementValues(editor_);
+      Serial.printf("arrangement: action=clear_pattern target=%u\n",
+                    targetPattern + 1);
+      return;
+    }
     const uint8_t chainValues[] = {
         '7', '8', '9', '4', '5', '6', '1', '2', '3', '.', '0', '`'};
     for (uint8_t position = 0; position < CHAIN_MAX_LENGTH; position++) {

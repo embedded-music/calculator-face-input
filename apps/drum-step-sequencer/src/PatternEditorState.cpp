@@ -38,6 +38,16 @@ bool PatternEditorState::stepActive(uint8_t track, uint8_t step) const {
          patterns_[currentPattern_].steps[track][step];
 }
 
+bool PatternEditorState::patternEmpty(uint8_t pattern) const {
+  if (pattern >= PATTERN_SLOT_COUNT) return true;
+  for (uint8_t track = 0; track < TRACK_COUNT; track++) {
+    for (uint8_t step = 0; step < STEP_COUNT; step++) {
+      if (patterns_[pattern].steps[track][step]) return false;
+    }
+  }
+  return true;
+}
+
 uint64_t PatternEditorState::stepIntervalUs() const {
   const RateRatio& ratio = RATE_RATIOS[static_cast<size_t>(stepRate_)];
   return (60000000ULL * ratio.beatsNumerator) /
@@ -95,6 +105,15 @@ void PatternEditorState::selectNextPattern(uint8_t pattern) {
 void PatternEditorState::cloneCurrentPatternTo(uint8_t pattern) {
   if (pattern >= PATTERN_SLOT_COUNT) return;
   patterns_[pattern] = patterns_[currentPattern_];
+}
+
+void PatternEditorState::clearPattern(uint8_t pattern) {
+  if (pattern >= PATTERN_SLOT_COUNT) return;
+  for (uint8_t track = 0; track < TRACK_COUNT; track++) {
+    for (uint8_t step = 0; step < STEP_COUNT; step++) {
+      patterns_[pattern].steps[track][step] = false;
+    }
+  }
 }
 
 uint8_t PatternEditorState::chainPatternAt(uint8_t position) const {

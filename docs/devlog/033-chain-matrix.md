@@ -22,6 +22,13 @@ pattern, and keeps the current pattern header synchronized. The arrangement
 view marks the current slot and the upcoming slot without redrawing the whole
 screen.
 
+The `=` cell clears all steps from the currently selected next pattern while
+preserving that pattern's track sounds. This gives the first reserved command
+a simple, directly audible editing operation.
+
+The top-row pattern selectors use a darker yellow for empty patterns, making
+available but unedited slots visible without adding another label.
+
 Turning off the currently playing position is quantized: it remains visibly
 current until the end of its sixteen-step cycle, while the next transition
 skips it. This avoids changing the active pattern in the middle of a cycle.

@@ -56,6 +56,7 @@ class PatternEditorState {
   }
   const DrumSound& soundForTrack(uint8_t track) const;
   bool stepActive(uint8_t track, uint8_t step) const;
+  bool patternEmpty(uint8_t pattern) const;
   void selectTrack(uint8_t track);
   bool toggleStep(uint8_t step);
   // Move the logical playhead to the present after one or more deadlines.
@@ -66,6 +67,7 @@ class PatternEditorState {
   bool patternChangedAtBoundary() const { return patternChangedAtBoundary_; }
   void selectNextPattern(uint8_t pattern);
   void cloneCurrentPatternTo(uint8_t pattern);
+  void clearPattern(uint8_t pattern);
   void toggleCloneMode() { cloneMode_ = !cloneMode_; }
   bool toggleChainPosition(uint8_t position);
   bool decreaseTempo();

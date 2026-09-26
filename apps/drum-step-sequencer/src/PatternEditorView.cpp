@@ -15,6 +15,7 @@ constexpr uint16_t COLOR_STEP_OFF = 0x2104;
 constexpr uint16_t COLOR_STEP_ON = TFT_CYAN;
 constexpr uint16_t COLOR_STEP_PENDING = 0x03EF;
 constexpr uint16_t COLOR_SELECTED = TFT_YELLOW;
+constexpr uint16_t COLOR_SELECTED_MUTED = 0x7BE0;
 constexpr uint16_t COLOR_PLAYHEAD = TFT_MAGENTA;
 constexpr uint16_t COLOR_TEXT = TFT_WHITE;
 constexpr uint16_t COLOR_MUTED_TEXT = 0x8410;
@@ -301,12 +302,15 @@ void PatternEditorView::drawArrangementValuesContent(
       uint8_t chainPosition = 0;
 
       if (row == 0) {
-        fill = COLOR_SELECTED;
+        fill = state.patternEmpty(column) ? COLOR_SELECTED_MUTED
+                                          : COLOR_SELECTED;
         border = state.nextPattern() == column ? COLOR_PLAYHEAD : COLOR_GRID;
         label = PATTERN_KEYS[column];
       } else if (row == 1 && column == 3) {
         label = state.cloneMode() ? "Clone ON" : "Clone OFF";
         if (state.cloneMode()) fill = COLOR_TEXT;
+      } else if (row == 4 && column == 3) {
+        label = "Clear";
       } else if (column < 3) {
         chainCell = true;
         chainPosition = static_cast<uint8_t>((row - 1) * 3 + column);
@@ -320,7 +324,7 @@ void PatternEditorView::drawArrangementValuesContent(
 
       display_.fillRect(x, y, KEY_WIDTH - 3, KEY_HEIGHT - 3, fill);
       display_.drawRect(x, y, KEY_WIDTH - 3, KEY_HEIGHT - 3, border);
-      display_.setTextSize(row == 1 && column == 3 ? 1 : 2);
+      display_.setTextSize((row == 1 || row == 4) && column == 3 ? 1 : 2);
       display_.setTextColor(fill == COLOR_STEP_OFF ? COLOR_TEXT
                                                    : COLOR_BACKGROUND,
                             fill);

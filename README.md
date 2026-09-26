@@ -60,6 +60,8 @@ Press a track key to select it. Press a step key to toggle that cell.
   upcoming chain positions are marked in the grid.
   The **\*** cell toggles Clone mode; when it is ON, choosing a pattern first
   copies the current pattern into that slot before queuing it.
+  The **=** cell clears all steps from the currently selected next pattern,
+  while preserving its sound choices.
 
 These are press toggles rather than hold modifiers, so the Calculator can be
 played with the other hand. Chords are not required by the current interface.
