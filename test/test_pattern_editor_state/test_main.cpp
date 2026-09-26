@@ -6,6 +6,28 @@
 #include "../../apps/drum-step-sequencer/src/SequencerSettings.cpp"
 #include "../../apps/drum-step-sequencer/src/SequencerPlaybackPolicy.h"
 #include "../../apps/drum-step-sequencer/src/SequencerCommandMap.cpp"
+#include "../../apps/drum-step-sequencer/src/SequencerPlayback.cpp"
+
+class FakeClock final : public SequencerClock {
+ public:
+  uint32_t nextElapsedSteps = 0;
+  SequencerClockAdvance poll(uint64_t) override {
+    return {nextElapsedSteps};
+  }
+};
+
+class FakeNoteSink final : public SequencerNoteSink {
+ public:
+  uint8_t wakeCount = 0;
+  uint8_t noteCount = 0;
+  uint8_t lastNote = 0;
+
+  void wake(uint32_t) override { wakeCount++; }
+  void noteOn(uint8_t midiNote, float) override {
+    noteCount++;
+    lastNote = midiNote;
+  }
+};
 #include "../../apps/drum-step-sequencer/src/PatternEditorState.cpp"
 
 void test_sparse_chain_advances_only_enabled_positions() {
@@ -147,6 +169,28 @@ void test_command_map_routes_each_mode_semantically() {
                               commandForMode(UiMode::Arrangement, '=').action));
 }
 
+void test_playback_with_fake_clock_and_note_sink() {
+  PatternEditorState state;
+  state.selectTrack(0);
+  state.toggleStep(1);
+  FakeClock clock;
+  FakeNoteSink sink;
+  SequencerPlayback playback(state, clock, sink);
+
+  clock.nextElapsedSteps = 1;
+  const SequencerPlaybackUpdate onTime = playback.update(0);
+  TEST_ASSERT_EQUAL_UINT32(1, onTime.elapsedSteps);
+  TEST_ASSERT_EQUAL_UINT8(1, sink.noteCount);
+  TEST_ASSERT_EQUAL_UINT8(1, sink.wakeCount);
+  TEST_ASSERT_EQUAL_UINT8(state.soundForTrack(0).midiNote, sink.lastNote);
+
+  clock.nextElapsedSteps = 3;
+  const SequencerPlaybackUpdate late = playback.update(0);
+  TEST_ASSERT_EQUAL_UINT32(3, late.elapsedSteps);
+  TEST_ASSERT_EQUAL_UINT8(1, sink.noteCount);
+  TEST_ASSERT_EQUAL_UINT8(1, sink.wakeCount);
+}
+
 int main() {
   UNITY_BEGIN();
   RUN_TEST(test_sparse_chain_advances_only_enabled_positions);
@@ -156,5 +200,6 @@ int main() {
   RUN_TEST(test_playback_policy_triggers_only_on_time);
   RUN_TEST(test_playback_policy_reports_pattern_transition);
   RUN_TEST(test_command_map_routes_each_mode_semantically);
+  RUN_TEST(test_playback_with_fake_clock_and_note_sink);
   return UNITY_END();
 }

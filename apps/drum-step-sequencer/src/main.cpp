@@ -7,6 +7,7 @@
 #include "AmyM5SpeakerBridge.h"
 #include "AmySynthSlot.h"
 #include "CalculatorLink.h"
+#include "DeadlineClockAdapter.h"
 #include "DeadlineClock.h"
 #include "PatternEditorState.h"
 #include "PatternEditorView.h"
@@ -26,7 +27,8 @@ AmyM5SpeakerBridge amyBridge;
 AmyAudioActivityGate audioGate(amyBridge);
 AmySynthSlot drumSlot;
 AmyDrumNoteSink noteSink(audioGate, drumSlot);
-SequencerPlayback playback(editor, stepClock, noteSink);
+DeadlineClockAdapter playbackClock(stepClock);
+SequencerPlayback playback(editor, playbackClock, noteSink);
 
 bool calculatorAcknowledges() {
   Wire.beginTransmission(CALCULATOR_I2C_ADDRESS);
@@ -64,6 +66,13 @@ void loop() {
 
   const SequencerPlaybackUpdate update = playback.update(nowUs);
   if (update.elapsedSteps > 0) {
+    if (update.patternChanged) {
+      Serial.printf("pattern: switched current=%u next=%u\n",
+                    editor.currentPattern() + 1, editor.nextPattern() + 1);
+    } else if (!update.patternChanged && update.elapsedSteps > 1) {
+      Serial.printf("transport: skipped_steps count=%lu\n",
+                    static_cast<unsigned long>(update.elapsedSteps));
+    }
     if (input.mode() == UiMode::Pattern) {
       if (update.patternChanged) view.drawPatternChange(editor);
       else view.drawPlayheadChange(editor, update.previousStep);

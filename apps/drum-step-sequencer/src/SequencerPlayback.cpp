@@ -1,7 +1,5 @@
 #include "SequencerPlayback.h"
 
-#include <Arduino.h>
-
 namespace {
 constexpr float DRUM_VELOCITY = 1.0f;
 constexpr uint32_t DRUM_TAIL_MS = 1500;
@@ -20,7 +18,7 @@ void SequencerPlayback::triggerCurrentStep() {
 
 SequencerPlaybackUpdate SequencerPlayback::update(uint64_t nowUs) {
   SequencerPlaybackUpdate result;
-  result.elapsedSteps = stepClock_.poll(nowUs).elapsed_intervals;
+  result.elapsedSteps = stepClock_.poll(nowUs).elapsedSteps;
   if (result.elapsedSteps == 0) return result;
 
   const PlaybackStepDecision decision =
@@ -28,15 +26,8 @@ SequencerPlaybackUpdate SequencerPlayback::update(uint64_t nowUs) {
   result.previousStep = decision.previousStep;
   result.patternBoundary = decision.patternBoundary;
   result.patternChanged = decision.patternChanged;
-  if (result.patternChanged) {
-    Serial.printf("pattern: switched current=%u next=%u\n",
-                  editor_.currentPattern() + 1, editor_.nextPattern() + 1);
-  }
   if (decision.triggerCurrentStep) {
     triggerCurrentStep();
-  } else {
-    Serial.printf("transport: skipped_steps count=%lu\n",
-                  static_cast<unsigned long>(result.elapsedSteps));
   }
   return result;
 }

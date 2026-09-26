@@ -2,9 +2,9 @@
 
 #include <stdint.h>
 
-#include "DeadlineClock.h"
 #include "PatternEditorState.h"
 #include "SequencerPlaybackPolicy.h"
+#include "SequencerClock.h"
 #include "SequencerNoteSink.h"
 
 struct SequencerPlaybackUpdate {
@@ -16,7 +16,7 @@ struct SequencerPlaybackUpdate {
 
 class SequencerPlayback {
  public:
-  SequencerPlayback(PatternEditorState& editor, DeadlineClock& stepClock,
+  SequencerPlayback(PatternEditorState& editor, SequencerClock& stepClock,
                     SequencerNoteSink& noteSink)
       : editor_(editor),
         stepClock_(stepClock),
@@ -28,6 +28,6 @@ class SequencerPlayback {
   void triggerCurrentStep();
 
   PatternEditorState& editor_;
-  DeadlineClock& stepClock_;
+  SequencerClock& stepClock_;
   SequencerNoteSink& noteSink_;
 };
