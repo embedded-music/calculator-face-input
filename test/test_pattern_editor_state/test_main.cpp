@@ -21,8 +21,12 @@ class FakeEventSink final : public SequencerEventSink {
   uint8_t wakeCount = 0;
   uint8_t noteCount = 0;
   uint8_t lastSoundId = 0;
+  uint32_t lastTailMs = 0;
 
-  void wake(uint32_t) override { wakeCount++; }
+  void wake(uint32_t tailMs) override {
+    wakeCount++;
+    lastTailMs = tailMs;
+  }
   void trigger(uint8_t soundId, float) override {
     noteCount++;
     lastSoundId = soundId;
@@ -183,12 +187,57 @@ void test_playback_with_fake_clock_and_event_sink() {
   TEST_ASSERT_EQUAL_UINT8(1, sink.noteCount);
   TEST_ASSERT_EQUAL_UINT8(1, sink.wakeCount);
   TEST_ASSERT_EQUAL_UINT8(state.soundForTrack(0).midiNote, sink.lastSoundId);
+  TEST_ASSERT_EQUAL_UINT32(1500, sink.lastTailMs);
 
   clock.nextElapsedSteps = 3;
   const SequencerPlaybackUpdate late = playback.update(0);
   TEST_ASSERT_EQUAL_UINT32(3, late.elapsedSteps);
   TEST_ASSERT_EQUAL_UINT8(1, sink.noteCount);
   TEST_ASSERT_EQUAL_UINT8(1, sink.wakeCount);
+}
+
+void test_playback_triggers_all_active_tracks_once_per_step() {
+  PatternEditorState state;
+  state.selectTrack(0);
+  state.toggleStep(1);
+  state.selectTrack(1);
+  state.toggleStep(1);
+  FakeClock clock;
+  FakeEventSink sink;
+  SequencerPlayback playback(state, clock, sink);
+
+  clock.nextElapsedSteps = 1;
+  const SequencerPlaybackUpdate update = playback.update(0);
+
+  TEST_ASSERT_EQUAL_UINT8(0, update.previousStep);
+  TEST_ASSERT_EQUAL_UINT8(2, sink.noteCount);
+  TEST_ASSERT_EQUAL_UINT8(1, sink.wakeCount);
+}
+
+void test_playback_reports_chain_change_then_triggers_new_pattern() {
+  PatternEditorState state;
+  state.selectTrack(0);
+  state.toggleStep(0);
+  state.toggleChainPosition(1);
+  state.selectNextPattern(1);
+  state.clearPattern(1);
+
+  FakeClock clock;
+  FakeEventSink sink;
+  SequencerPlayback playback(state, clock, sink);
+
+  clock.nextElapsedSteps = STEP_COUNT;
+  const SequencerPlaybackUpdate boundary = playback.update(0);
+  TEST_ASSERT_TRUE(boundary.patternBoundary);
+  TEST_ASSERT_TRUE(boundary.patternChanged);
+  TEST_ASSERT_EQUAL_UINT8(0, sink.noteCount);
+
+  state.selectTrack(0);
+  state.toggleStep(1);
+  clock.nextElapsedSteps = 1;
+  const SequencerPlaybackUpdate nextStep = playback.update(0);
+  TEST_ASSERT_FALSE(nextStep.patternBoundary);
+  TEST_ASSERT_EQUAL_UINT8(1, sink.noteCount);
 }
 
 int main() {
@@ -201,5 +250,7 @@ int main() {
   RUN_TEST(test_playback_policy_reports_pattern_transition);
   RUN_TEST(test_command_map_routes_each_mode_semantically);
   RUN_TEST(test_playback_with_fake_clock_and_event_sink);
+  RUN_TEST(test_playback_triggers_all_active_tracks_once_per_step);
+  RUN_TEST(test_playback_reports_chain_change_then_triggers_new_pattern);
   return UNITY_END();
 }
