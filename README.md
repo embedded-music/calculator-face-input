@@ -54,10 +54,10 @@ Press a track key to select it. Press a step key to toggle that cell.
 - Press **B** to toggle the sound browser for the selected track. Press it
   again to return to the pattern.
 - Press **C** to toggle the arrangement screen. Its yellow top row selects the
-  next pattern with **AC**, **M**, **%**, or **/**. The rows below show a chain
-  of two to twelve pattern slots; **\*** decreases the chain length and **-**
-  increases it. The current and upcoming chain positions are marked in the
-  grid.
+  next pattern with **AC**, **M**, **%**, or **/**. The twelve cells below are
+  chain positions: press their calculator keys to toggle positions on or off.
+  The active positions, in grid order, form the chain. The current and
+  upcoming chain positions are marked in the grid.
 
 These are press toggles rather than hold modifiers, so the Calculator can be
 played with the other hand. Chords are not required by the current interface.

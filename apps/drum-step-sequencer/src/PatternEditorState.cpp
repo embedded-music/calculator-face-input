@@ -28,7 +28,9 @@ PatternEditorState::PatternEditorState() {
   }
   for (uint8_t position = 0; position < CHAIN_MAX_LENGTH; position++) {
     chain_[position] = 0;
+    chainEnabled_[position] = position == 0;
   }
+  chainLength_ = 1;
 }
 
 bool PatternEditorState::stepActive(uint8_t track, uint8_t step) const {
@@ -74,19 +76,18 @@ bool PatternEditorState::advanceByElapsedSteps(uint32_t elapsedSteps) {
   currentStep_ = static_cast<uint8_t>(
       (currentStep_ + (elapsedSteps % STEP_COUNT)) % STEP_COUNT);
   if (crossedBoundary) {
-    chainPosition_ = static_cast<uint8_t>((chainPosition_ + 1) % chainLength_);
+    chainPosition_ = nextEnabledPosition(chainPosition_);
     const uint8_t nextCurrentPattern = chain_[chainPosition_];
     patternChangedAtBoundary_ = currentPattern_ != nextCurrentPattern;
     currentPattern_ = nextCurrentPattern;
-    nextPattern_ = chain_[(chainPosition_ + 1) % chainLength_];
+    nextPattern_ = chain_[nextEnabledPosition(chainPosition_)];
   }
   return crossedBoundary;
 }
 
 void PatternEditorState::selectNextPattern(uint8_t pattern) {
   if (pattern >= PATTERN_SLOT_COUNT) return;
-  const uint8_t nextPosition =
-      static_cast<uint8_t>((chainPosition_ + 1) % chainLength_);
+  const uint8_t nextPosition = nextEnabledPosition(chainPosition_);
   chain_[nextPosition] = pattern;
   nextPattern_ = pattern;
 }
@@ -95,22 +96,25 @@ uint8_t PatternEditorState::chainPatternAt(uint8_t position) const {
   return position < CHAIN_MAX_LENGTH ? chain_[position] : 0;
 }
 
-bool PatternEditorState::decreaseChainLength() {
-  if (chainLength_ <= CHAIN_MIN_LENGTH) return false;
-  chainLength_--;
-  if (chainPosition_ >= chainLength_) {
-    chainPosition_ = 0;
-    currentPattern_ = chain_[chainPosition_];
+uint8_t PatternEditorState::nextEnabledPosition(uint8_t position) const {
+  for (uint8_t offset = 1; offset <= CHAIN_MAX_LENGTH; offset++) {
+    const uint8_t candidate = static_cast<uint8_t>(
+        (position + offset) % CHAIN_MAX_LENGTH);
+    if (chainEnabled_[candidate]) return candidate;
   }
-  nextPattern_ = chain_[(chainPosition_ + 1) % chainLength_];
-  return true;
+  return position;
 }
 
-bool PatternEditorState::increaseChainLength() {
-  if (chainLength_ >= CHAIN_MAX_LENGTH) return false;
-  chain_[chainLength_] = chain_[chainLength_ - 1];
-  chainLength_++;
-  nextPattern_ = chain_[(chainPosition_ + 1) % chainLength_];
+bool PatternEditorState::toggleChainPosition(uint8_t position) {
+  if (position >= CHAIN_MAX_LENGTH) return false;
+  if (chainEnabled_[position] && chainLength_ <= CHAIN_MIN_LENGTH) {
+    return false;
+  }
+
+  chainEnabled_[position] = !chainEnabled_[position];
+  chainLength_ = static_cast<uint8_t>(chainLength_ +
+                                      (chainEnabled_[position] ? 1 : -1));
+  nextPattern_ = chain_[nextEnabledPosition(chainPosition_)];
   return true;
 }
 

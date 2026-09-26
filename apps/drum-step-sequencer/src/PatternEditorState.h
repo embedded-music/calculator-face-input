@@ -7,7 +7,7 @@
 constexpr uint8_t TRACK_COUNT = 4;
 constexpr uint8_t STEP_COUNT = 16;
 constexpr uint8_t PATTERN_SLOT_COUNT = 4;
-constexpr uint8_t CHAIN_MIN_LENGTH = 2;
+constexpr uint8_t CHAIN_MIN_LENGTH = 1;
 constexpr uint8_t CHAIN_MAX_LENGTH = 12;
 constexpr uint16_t MIN_TEMPO_BPM = 40;
 constexpr uint16_t MAX_TEMPO_BPM = 240;
@@ -36,6 +36,13 @@ class PatternEditorState {
   uint8_t nextPattern() const { return nextPattern_; }
   uint8_t chainLength() const { return chainLength_; }
   uint8_t chainPosition() const { return chainPosition_; }
+  uint8_t nextChainPosition() const { return nextEnabledPosition(chainPosition_); }
+  bool chainPositionEnabled(uint8_t position) const {
+    return position < CHAIN_MAX_LENGTH && chainEnabled_[position];
+  }
+  bool chainPositionVisible(uint8_t position) const {
+    return chainPositionEnabled(position) || position == chainPosition_;
+  }
   uint8_t chainPatternAt(uint8_t position) const;
   uint16_t tempoBpm() const { return tempoBpm_; }
   uint64_t stepIntervalUs() const;
@@ -57,8 +64,7 @@ class PatternEditorState {
   bool advanceByElapsedSteps(uint32_t elapsedSteps);
   bool patternChangedAtBoundary() const { return patternChangedAtBoundary_; }
   void selectNextPattern(uint8_t pattern);
-  bool decreaseChainLength();
-  bool increaseChainLength();
+  bool toggleChainPosition(uint8_t position);
   bool decreaseTempo();
   bool increaseTempo();
   bool decreaseRate();
@@ -79,10 +85,13 @@ class PatternEditorState {
   uint8_t currentPattern_ = 0;
   uint8_t nextPattern_ = 0;
   uint8_t chain_[CHAIN_MAX_LENGTH]{};
+  bool chainEnabled_[CHAIN_MAX_LENGTH]{};
   uint8_t chainLength_ = CHAIN_MIN_LENGTH;
   uint8_t chainPosition_ = 0;
   bool patternChangedAtBoundary_ = false;
   uint16_t tempoBpm_ = 120;
   StepRate stepRate_ = StepRate::Sixteenth;
   uint8_t speakerVolume_ = 128;
+
+  uint8_t nextEnabledPosition(uint8_t position) const;
 };

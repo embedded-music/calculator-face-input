@@ -13,6 +13,7 @@ constexpr uint16_t COLOR_HEADER = 0x18C3;
 constexpr uint16_t COLOR_GRID = 0x4208;
 constexpr uint16_t COLOR_STEP_OFF = 0x2104;
 constexpr uint16_t COLOR_STEP_ON = TFT_CYAN;
+constexpr uint16_t COLOR_STEP_PENDING = 0x03EF;
 constexpr uint16_t COLOR_SELECTED = TFT_YELLOW;
 constexpr uint16_t COLOR_PLAYHEAD = TFT_MAGENTA;
 constexpr uint16_t COLOR_TEXT = TFT_WHITE;
@@ -306,11 +307,12 @@ void PatternEditorView::drawArrangementValuesContent(
       } else if (column < 3) {
         chainCell = true;
         chainPosition = static_cast<uint8_t>((row - 1) * 3 + column);
-        const bool active = chainPosition < state.chainLength();
-        fill = active ? COLOR_STEP_ON : COLOR_STEP_OFF;
+        const bool enabled = state.chainPositionEnabled(chainPosition);
+        const bool pendingRemoval = !enabled &&
+                                    chainPosition == state.chainPosition();
+        fill = enabled ? COLOR_STEP_ON
+                       : pendingRemoval ? COLOR_STEP_PENDING : COLOR_STEP_OFF;
         label = PATTERN_KEYS[state.chainPatternAt(chainPosition)];
-      } else if (row == 1 || row == 2) {
-        border = COLOR_SELECTED;
       }
 
       display_.fillRect(x, y, KEY_WIDTH - 3, KEY_HEIGHT - 3, fill);
@@ -323,11 +325,9 @@ void PatternEditorView::drawArrangementValuesContent(
       display_.drawString(label, x + (KEY_WIDTH - 3) / 2,
                           y + (KEY_HEIGHT - 3) / 2);
       display_.setTextDatum(TL_DATUM);
-      if (chainCell && chainPosition < state.chainLength()) {
+      if (chainCell && state.chainPositionVisible(chainPosition)) {
         const bool current = chainPosition == state.chainPosition();
-        const bool next = chainPosition == static_cast<uint8_t>(
-                                             (state.chainPosition() + 1) %
-                                             state.chainLength());
+        const bool next = chainPosition == state.nextChainPosition();
         if (current || next) {
           display_.fillRect(x + 3, y + KEY_HEIGHT - 8, KEY_WIDTH - 9, 4,
                             current ? COLOR_PLAYHEAD : COLOR_SELECTED);

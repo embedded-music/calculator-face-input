@@ -64,20 +64,21 @@ void SequencerInput::handleCalculatorValue(uint8_t value, uint64_t nowUs) {
   }
 
   if (mode_ == UiMode::Arrangement) {
-    if (value == '*') {
-      if (editor_.decreaseChainLength()) {
-        view_.drawArrangementValues(editor_);
-        Serial.printf("arrangement: action=chain_length value=%u\n",
-                      editor_.chainLength());
+    const uint8_t chainValues[] = {
+        '7', '8', '9', '4', '5', '6', '1', '2', '3', '.', '0', '`'};
+    for (uint8_t position = 0; position < CHAIN_MAX_LENGTH; position++) {
+      if (chainValues[position] == value) {
+        if (editor_.toggleChainPosition(position)) {
+          view_.drawArrangementValues(editor_);
+          Serial.printf("arrangement: action=toggle_chain position=%u active=%s length=%u\n",
+                        position + 1,
+                        editor_.chainPositionEnabled(position) ? "yes" : "no",
+                        editor_.chainLength());
+        }
+        return;
       }
-      return;
     }
-    if (value == '-') {
-      if (editor_.increaseChainLength()) {
-        view_.drawArrangementValues(editor_);
-        Serial.printf("arrangement: action=chain_length value=%u\n",
-                      editor_.chainLength());
-      }
+    if (value == '*' || value == '-' || value == '+' || value == '=') {
       return;
     }
     uint8_t patternIndex = 0;
