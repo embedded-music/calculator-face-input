@@ -304,7 +304,6 @@ void PatternEditorView::drawArrangementValuesContent(
       if (row == 0) {
         fill = state.patternEmpty(column) ? COLOR_SELECTED_MUTED
                                           : COLOR_SELECTED;
-        border = state.nextPattern() == column ? COLOR_PLAYHEAD : COLOR_GRID;
         label = PATTERN_KEYS[column];
       } else if (row == 1 && column == 3) {
         label = state.cloneMode() ? "Clone ON" : "Clone OFF";

@@ -85,7 +85,7 @@ class PatternEditorState {
   };
 
   PatternData patterns_[PATTERN_SLOT_COUNT]{};
-  uint8_t selectedTrack_ = 0;
+  uint8_t selectedTrack_ = TRACK_COUNT - 1;
   uint8_t currentStep_ = 0;
   uint8_t currentPattern_ = 0;
   uint8_t nextPattern_ = 0;
