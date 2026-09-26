@@ -7,6 +7,8 @@
 constexpr uint8_t TRACK_COUNT = 4;
 constexpr uint8_t STEP_COUNT = 16;
 constexpr uint8_t PATTERN_SLOT_COUNT = 4;
+constexpr uint8_t CHAIN_MIN_LENGTH = 2;
+constexpr uint8_t CHAIN_MAX_LENGTH = 12;
 constexpr uint16_t MIN_TEMPO_BPM = 40;
 constexpr uint16_t MAX_TEMPO_BPM = 240;
 constexpr uint16_t TEMPO_INCREMENT_BPM = 5;
@@ -32,6 +34,9 @@ class PatternEditorState {
   uint8_t currentStep() const { return currentStep_; }
   uint8_t currentPattern() const { return currentPattern_; }
   uint8_t nextPattern() const { return nextPattern_; }
+  uint8_t chainLength() const { return chainLength_; }
+  uint8_t chainPosition() const { return chainPosition_; }
+  uint8_t chainPatternAt(uint8_t position) const;
   uint16_t tempoBpm() const { return tempoBpm_; }
   uint64_t stepIntervalUs() const;
   StepRate stepRate() const { return stepRate_; }
@@ -47,10 +52,13 @@ class PatternEditorState {
   bool toggleStep(uint8_t step);
   // Move the logical playhead to the present after one or more deadlines.
   // Missed steps are intentionally not replayed as audio bursts.
-  // Returns true when crossing the 16-step boundary changes the current
-  // pattern. The playhead may still wrap when the pattern stays the same.
+  // Returns true when crossing the 16-step boundary. The current pattern may
+  // stay the same while the chain position advances.
   bool advanceByElapsedSteps(uint32_t elapsedSteps);
+  bool patternChangedAtBoundary() const { return patternChangedAtBoundary_; }
   void selectNextPattern(uint8_t pattern);
+  bool decreaseChainLength();
+  bool increaseChainLength();
   bool decreaseTempo();
   bool increaseTempo();
   bool decreaseRate();
@@ -70,6 +78,10 @@ class PatternEditorState {
   uint8_t currentStep_ = 0;
   uint8_t currentPattern_ = 0;
   uint8_t nextPattern_ = 0;
+  uint8_t chain_[CHAIN_MAX_LENGTH]{};
+  uint8_t chainLength_ = CHAIN_MIN_LENGTH;
+  uint8_t chainPosition_ = 0;
+  bool patternChangedAtBoundary_ = false;
   uint16_t tempoBpm_ = 120;
   StepRate stepRate_ = StepRate::Sixteenth;
   uint8_t speakerVolume_ = 128;

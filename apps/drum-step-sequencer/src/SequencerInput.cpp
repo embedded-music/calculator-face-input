@@ -64,6 +64,22 @@ void SequencerInput::handleCalculatorValue(uint8_t value, uint64_t nowUs) {
   }
 
   if (mode_ == UiMode::Arrangement) {
+    if (value == '*') {
+      if (editor_.decreaseChainLength()) {
+        view_.drawArrangementValues(editor_);
+        Serial.printf("arrangement: action=chain_length value=%u\n",
+                      editor_.chainLength());
+      }
+      return;
+    }
+    if (value == '-') {
+      if (editor_.increaseChainLength()) {
+        view_.drawArrangementValues(editor_);
+        Serial.printf("arrangement: action=chain_length value=%u\n",
+                      editor_.chainLength());
+      }
+      return;
+    }
     uint8_t patternIndex = 0;
     if (!patternIndexForCalculatorValue(value, patternIndex)) return;
     editor_.selectNextPattern(patternIndex);

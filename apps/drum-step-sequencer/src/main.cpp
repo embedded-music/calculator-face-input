@@ -79,7 +79,8 @@ void loop() {
     // and discard all overdue triggers. When more than one event elapsed,
     // wait for the next absolute deadline before emitting audio again; an
     // immediate trigger here would compress the first interval after recovery.
-    const bool patternChanged = editor.advanceByElapsedSteps(elapsedSteps);
+    const bool patternBoundary = editor.advanceByElapsedSteps(elapsedSteps);
+    const bool patternChanged = editor.patternChangedAtBoundary();
     if (patternChanged) {
       Serial.printf("pattern: switched current=%u next=%u\n",
                     editor.currentPattern() + 1, editor.nextPattern() + 1);
@@ -93,7 +94,7 @@ void loop() {
     if (input.mode() == UiMode::Pattern) {
       if (patternChanged) view.drawPatternChange(editor);
       else view.drawPlayheadChange(editor, previousStep);
-    } else if (patternChanged && input.mode() == UiMode::Arrangement) {
+    } else if (patternBoundary && input.mode() == UiMode::Arrangement) {
       view.drawArrangementValues(editor);
     }
   }

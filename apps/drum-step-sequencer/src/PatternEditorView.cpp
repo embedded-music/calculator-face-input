@@ -279,32 +279,55 @@ void PatternEditorView::drawArrangement(const PatternEditorState& state) {
   display_.print("ARRANGEMENT");
 
   drawArrangementValuesContent(state);
-
-  display_.setTextSize(1);
-  display_.setTextColor(COLOR_MUTED_TEXT, COLOR_BACKGROUND);
-  display_.setCursor(16, 190);
-  display_.print("AC   M   %   /   select next pattern");
   display_.endWrite();
 }
 
 void PatternEditorView::drawArrangementValuesContent(
     const PatternEditorState& state) {
-  constexpr int16_t VALUE_X = 16;
-  constexpr int16_t VALUE_WIDTH = 210;
-  constexpr int16_t VALUE_HEIGHT = 28;
-  constexpr int16_t VALUE_YS[] = {48, 88, 128};
-  for (int16_t y : VALUE_YS) {
-    display_.fillRect(VALUE_X - 4, y, VALUE_WIDTH, VALUE_HEIGHT,
-                      COLOR_BACKGROUND);
+  constexpr int16_t KEY_X = 8;
+  constexpr int16_t KEY_Y = 42;
+  constexpr int16_t KEY_WIDTH = 74;
+  constexpr int16_t KEY_HEIGHT = 38;
+
+  for (uint8_t row = 0; row < 5; row++) {
+    for (uint8_t column = 0; column < 4; column++) {
+      const int16_t x = KEY_X + column * KEY_WIDTH;
+      const int16_t y = KEY_Y + row * KEY_HEIGHT;
+      uint16_t fill = COLOR_STEP_OFF;
+      uint16_t border = COLOR_GRID;
+      const char* label = CALCULATOR_KEY_LABELS[row][column];
+
+      if (row == 0) {
+        fill = COLOR_SELECTED;
+        border = state.nextPattern() == column ? COLOR_PLAYHEAD : COLOR_GRID;
+        label = PATTERN_KEYS[column];
+      } else if (column < 3) {
+        const uint8_t position = static_cast<uint8_t>((row - 1) * 3 + column);
+        const bool active = position < state.chainLength();
+        fill = active ? COLOR_STEP_ON : COLOR_STEP_OFF;
+        if (position == state.chainPosition()) border = COLOR_PLAYHEAD;
+        else if (active && position ==
+                 static_cast<uint8_t>((state.chainPosition() + 1) %
+                                      state.chainLength())) {
+          border = COLOR_SELECTED;
+        }
+        label = PATTERN_KEYS[state.chainPatternAt(position)];
+      } else if (row == 1 || row == 2) {
+        border = COLOR_SELECTED;
+      }
+
+      display_.fillRect(x, y, KEY_WIDTH - 3, KEY_HEIGHT - 3, fill);
+      display_.drawRect(x, y, KEY_WIDTH - 3, KEY_HEIGHT - 3, border);
+      display_.setTextSize(2);
+      display_.setTextColor(fill == COLOR_STEP_OFF ? COLOR_TEXT
+                                                   : COLOR_BACKGROUND,
+                            fill);
+      display_.setTextDatum(MC_DATUM);
+      display_.drawString(label, x + (KEY_WIDTH - 3) / 2,
+                          y + (KEY_HEIGHT - 3) / 2);
+      display_.setTextDatum(TL_DATUM);
+    }
   }
-  display_.setTextSize(2);
-  display_.setTextColor(COLOR_TEXT, COLOR_BACKGROUND);
-  display_.setCursor(16, 58);
-  display_.printf("Current = %s", PATTERN_KEYS[state.currentPattern()]);
-  display_.setCursor(16, 98);
-  display_.printf("Next    = %s", PATTERN_KEYS[state.nextPattern()]);
-  display_.setCursor(16, 138);
-  display_.print("Clone   = off");
 }
 
 void PatternEditorView::drawArrangementValues(

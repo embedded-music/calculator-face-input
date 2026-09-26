@@ -26,6 +26,9 @@ PatternEditorState::PatternEditorState() {
       patterns_[pattern].soundIndices[track] = DEFAULT_SOUND_INDICES[track];
     }
   }
+  for (uint8_t position = 0; position < CHAIN_MAX_LENGTH; position++) {
+    chain_[position] = 0;
+  }
 }
 
 bool PatternEditorState::stepActive(uint8_t track, uint8_t step) const {
@@ -64,18 +67,51 @@ bool PatternEditorState::toggleStep(uint8_t step) {
 }
 
 bool PatternEditorState::advanceByElapsedSteps(uint32_t elapsedSteps) {
+  patternChangedAtBoundary_ = false;
   if (elapsedSteps == 0) return false;
   const bool crossedBoundary =
       elapsedSteps >= STEP_COUNT || currentStep_ + elapsedSteps >= STEP_COUNT;
   currentStep_ = static_cast<uint8_t>(
       (currentStep_ + (elapsedSteps % STEP_COUNT)) % STEP_COUNT);
-  const bool patternChanged = crossedBoundary && currentPattern_ != nextPattern_;
-  if (crossedBoundary) currentPattern_ = nextPattern_;
-  return patternChanged;
+  if (crossedBoundary) {
+    chainPosition_ = static_cast<uint8_t>((chainPosition_ + 1) % chainLength_);
+    const uint8_t nextCurrentPattern = chain_[chainPosition_];
+    patternChangedAtBoundary_ = currentPattern_ != nextCurrentPattern;
+    currentPattern_ = nextCurrentPattern;
+    nextPattern_ = chain_[(chainPosition_ + 1) % chainLength_];
+  }
+  return crossedBoundary;
 }
 
 void PatternEditorState::selectNextPattern(uint8_t pattern) {
-  if (pattern < PATTERN_SLOT_COUNT) nextPattern_ = pattern;
+  if (pattern >= PATTERN_SLOT_COUNT) return;
+  const uint8_t nextPosition =
+      static_cast<uint8_t>((chainPosition_ + 1) % chainLength_);
+  chain_[nextPosition] = pattern;
+  nextPattern_ = pattern;
+}
+
+uint8_t PatternEditorState::chainPatternAt(uint8_t position) const {
+  return position < CHAIN_MAX_LENGTH ? chain_[position] : 0;
+}
+
+bool PatternEditorState::decreaseChainLength() {
+  if (chainLength_ <= CHAIN_MIN_LENGTH) return false;
+  chainLength_--;
+  if (chainPosition_ >= chainLength_) {
+    chainPosition_ = 0;
+    currentPattern_ = chain_[chainPosition_];
+  }
+  nextPattern_ = chain_[(chainPosition_ + 1) % chainLength_];
+  return true;
+}
+
+bool PatternEditorState::increaseChainLength() {
+  if (chainLength_ >= CHAIN_MAX_LENGTH) return false;
+  chain_[chainLength_] = chain_[chainLength_ - 1];
+  chainLength_++;
+  nextPattern_ = chain_[(chainPosition_ + 1) % chainLength_];
+  return true;
 }
 
 bool PatternEditorState::decreaseTempo() {
