@@ -1,5 +1,6 @@
 #include <unity.h>
 
+#include "../../apps/drum-step-sequencer/src/PatternChain.cpp"
 #include "../../apps/drum-step-sequencer/src/PatternEditorState.cpp"
 
 void test_sparse_chain_advances_only_enabled_positions() {

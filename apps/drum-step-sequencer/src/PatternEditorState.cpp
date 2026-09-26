@@ -26,11 +26,6 @@ PatternEditorState::PatternEditorState() {
       patterns_[pattern].soundIndices[track] = DEFAULT_SOUND_INDICES[track];
     }
   }
-  for (uint8_t position = 0; position < CHAIN_MAX_LENGTH; position++) {
-    chain_[position] = 0;
-    chainEnabled_[position] = position == 0;
-  }
-  chainLength_ = 1;
 }
 
 bool PatternEditorState::stepActive(uint8_t track, uint8_t step) const {
@@ -86,19 +81,18 @@ bool PatternEditorState::advanceByElapsedSteps(uint32_t elapsedSteps) {
   currentStep_ = static_cast<uint8_t>(
       (currentStep_ + (elapsedSteps % STEP_COUNT)) % STEP_COUNT);
   if (crossedBoundary) {
-    chainPosition_ = nextEnabledPosition(chainPosition_);
-    const uint8_t nextCurrentPattern = chain_[chainPosition_];
+    chain_.advance();
+    const uint8_t nextCurrentPattern = chain_.currentPattern();
     patternChangedAtBoundary_ = currentPattern_ != nextCurrentPattern;
     currentPattern_ = nextCurrentPattern;
-    nextPattern_ = chain_[nextEnabledPosition(chainPosition_)];
+    nextPattern_ = chain_.nextPattern();
   }
   return crossedBoundary;
 }
 
 void PatternEditorState::selectNextPattern(uint8_t pattern) {
   if (pattern >= PATTERN_SLOT_COUNT) return;
-  const uint8_t nextPosition = nextEnabledPosition(chainPosition_);
-  chain_[nextPosition] = pattern;
+  chain_.setNextPattern(pattern);
   nextPattern_ = pattern;
 }
 
@@ -116,30 +110,10 @@ void PatternEditorState::clearPattern(uint8_t pattern) {
   }
 }
 
-uint8_t PatternEditorState::chainPatternAt(uint8_t position) const {
-  return position < CHAIN_MAX_LENGTH ? chain_[position] : 0;
-}
-
-uint8_t PatternEditorState::nextEnabledPosition(uint8_t position) const {
-  for (uint8_t offset = 1; offset <= CHAIN_MAX_LENGTH; offset++) {
-    const uint8_t candidate = static_cast<uint8_t>(
-        (position + offset) % CHAIN_MAX_LENGTH);
-    if (chainEnabled_[candidate]) return candidate;
-  }
-  return position;
-}
-
 bool PatternEditorState::toggleChainPosition(uint8_t position) {
-  if (position >= CHAIN_MAX_LENGTH) return false;
-  if (chainEnabled_[position] && chainLength_ <= CHAIN_MIN_LENGTH) {
-    return false;
-  }
-
-  chainEnabled_[position] = !chainEnabled_[position];
-  chainLength_ = static_cast<uint8_t>(chainLength_ +
-                                      (chainEnabled_[position] ? 1 : -1));
-  nextPattern_ = chain_[nextEnabledPosition(chainPosition_)];
-  return true;
+  const bool changed = chain_.togglePosition(position);
+  nextPattern_ = chain_.nextPattern();
+  return changed;
 }
 
 bool PatternEditorState::decreaseTempo() {
