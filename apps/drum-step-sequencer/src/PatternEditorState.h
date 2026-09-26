@@ -47,7 +47,8 @@ class PatternEditorState {
   bool toggleStep(uint8_t step);
   // Move the logical playhead to the present after one or more deadlines.
   // Missed steps are intentionally not replayed as audio bursts.
-  // Returns true when the 16-step pattern boundary was crossed.
+  // Returns true when crossing the 16-step boundary changes the current
+  // pattern. The playhead may still wrap when the pattern stays the same.
   bool advanceByElapsedSteps(uint32_t elapsedSteps);
   void selectNextPattern(uint8_t pattern);
   bool decreaseTempo();

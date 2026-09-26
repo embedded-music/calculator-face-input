@@ -69,8 +69,9 @@ bool PatternEditorState::advanceByElapsedSteps(uint32_t elapsedSteps) {
       elapsedSteps >= STEP_COUNT || currentStep_ + elapsedSteps >= STEP_COUNT;
   currentStep_ = static_cast<uint8_t>(
       (currentStep_ + (elapsedSteps % STEP_COUNT)) % STEP_COUNT);
+  const bool patternChanged = crossedBoundary && currentPattern_ != nextPattern_;
   if (crossedBoundary) currentPattern_ = nextPattern_;
-  return crossedBoundary;
+  return patternChanged;
 }
 
 void PatternEditorState::selectNextPattern(uint8_t pattern) {
