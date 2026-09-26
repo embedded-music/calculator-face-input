@@ -2,11 +2,10 @@
 
 #include <stdint.h>
 
-#include "AmyAudioActivityGate.h"
-#include "AmySynthSlot.h"
 #include "DeadlineClock.h"
 #include "PatternEditorState.h"
 #include "SequencerPlaybackPolicy.h"
+#include "SequencerNoteSink.h"
 
 struct SequencerPlaybackUpdate {
   uint32_t elapsedSteps = 0;
@@ -18,11 +17,10 @@ struct SequencerPlaybackUpdate {
 class SequencerPlayback {
  public:
   SequencerPlayback(PatternEditorState& editor, DeadlineClock& stepClock,
-                    AmyAudioActivityGate& audioGate, AmySynthSlot& drumSlot)
+                    SequencerNoteSink& noteSink)
       : editor_(editor),
         stepClock_(stepClock),
-        audioGate_(audioGate),
-        drumSlot_(drumSlot) {}
+        noteSink_(noteSink) {}
 
   SequencerPlaybackUpdate update(uint64_t nowUs);
 
@@ -31,6 +29,5 @@ class SequencerPlayback {
 
   PatternEditorState& editor_;
   DeadlineClock& stepClock_;
-  AmyAudioActivityGate& audioGate_;
-  AmySynthSlot& drumSlot_;
+  SequencerNoteSink& noteSink_;
 };
