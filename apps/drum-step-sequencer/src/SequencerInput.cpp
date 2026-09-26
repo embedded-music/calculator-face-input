@@ -1,6 +1,7 @@
 #include "SequencerInput.h"
 
 #include <Arduino.h>
+#include <esp_timer.h>
 #include <M5Unified.h>
 #include <Wire.h>
 
@@ -18,6 +19,9 @@ bool readCalculatorByte(uint8_t& value) {
 }  // namespace
 
 bool SequencerInput::rescheduleStepClock(uint64_t nowUs) {
+  // I2C reads and redraws happen before this call. Use a fresh timestamp so
+  // tempo/rate changes are not applied relative to a stale loop timestamp.
+  nowUs = static_cast<uint64_t>(esp_timer_get_time());
   const bool rescheduled = stepClock_.reschedule(
       nowUs, editor_.stepIntervalUs(), IntervalChangePolicy::PreservePhase);
   if (!rescheduled) Serial.println("clock: reschedule_failed");

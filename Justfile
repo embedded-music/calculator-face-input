@@ -14,6 +14,9 @@ upload-probe:
 build-sequencer:
     {{pio}} run -e drum-step-sequencer
 
+test-native:
+    {{pio}} test -e native
+
 upload-sequencer:
     {{pio}} run -e drum-step-sequencer --target upload
 

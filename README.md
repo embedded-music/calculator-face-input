@@ -76,6 +76,7 @@ the instrument remains discoverable without a separate controller.
 
 ```sh
 just build-sequencer
+just test-native
 just upload-sequencer
 just monitor
 ```
