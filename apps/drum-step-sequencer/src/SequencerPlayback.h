@@ -6,6 +6,7 @@
 #include "AmySynthSlot.h"
 #include "DeadlineClock.h"
 #include "PatternEditorState.h"
+#include "SequencerPlaybackPolicy.h"
 
 struct SequencerPlaybackUpdate {
   uint32_t elapsedSteps = 0;

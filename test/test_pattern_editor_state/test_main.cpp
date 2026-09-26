@@ -3,6 +3,7 @@
 #include "../../apps/drum-step-sequencer/src/PatternBank.cpp"
 #include "../../apps/drum-step-sequencer/src/PatternChain.cpp"
 #include "../../apps/drum-step-sequencer/src/SequencerSettings.cpp"
+#include "../../apps/drum-step-sequencer/src/SequencerPlaybackPolicy.h"
 #include "../../apps/drum-step-sequencer/src/PatternEditorState.cpp"
 
 void test_sparse_chain_advances_only_enabled_positions() {
@@ -92,11 +93,41 @@ void test_settings_clamp_and_rate_boundaries() {
   TEST_ASSERT_FALSE(settings.increaseRate());
 }
 
+void test_playback_policy_triggers_only_on_time() {
+  PatternEditorState state;
+
+  const PlaybackStepDecision onTime =
+      SequencerPlaybackPolicy::advance(state, 1);
+  TEST_ASSERT_EQUAL_UINT8(0, onTime.previousStep);
+  TEST_ASSERT_TRUE(onTime.triggerCurrentStep);
+  TEST_ASSERT_EQUAL_UINT8(1, state.currentStep());
+
+  const PlaybackStepDecision late =
+      SequencerPlaybackPolicy::advance(state, 3);
+  TEST_ASSERT_EQUAL_UINT8(1, late.previousStep);
+  TEST_ASSERT_FALSE(late.triggerCurrentStep);
+  TEST_ASSERT_EQUAL_UINT8(4, state.currentStep());
+}
+
+void test_playback_policy_reports_pattern_transition() {
+  PatternEditorState state;
+  state.selectNextPattern(1);
+
+  const PlaybackStepDecision decision =
+      SequencerPlaybackPolicy::advance(state, STEP_COUNT);
+  TEST_ASSERT_TRUE(decision.patternBoundary);
+  TEST_ASSERT_TRUE(decision.patternChanged);
+  TEST_ASSERT_EQUAL_UINT8(1, state.currentPattern());
+  TEST_ASSERT_FALSE(decision.triggerCurrentStep);
+}
+
 int main() {
   UNITY_BEGIN();
   RUN_TEST(test_sparse_chain_advances_only_enabled_positions);
   RUN_TEST(test_current_chain_position_removal_is_quantized);
   RUN_TEST(test_clone_and_clear_preserve_sound_choices);
   RUN_TEST(test_settings_clamp_and_rate_boundaries);
+  RUN_TEST(test_playback_policy_triggers_only_on_time);
+  RUN_TEST(test_playback_policy_reports_pattern_transition);
   return UNITY_END();
 }

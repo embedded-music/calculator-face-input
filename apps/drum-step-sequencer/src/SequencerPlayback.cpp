@@ -23,16 +23,16 @@ SequencerPlaybackUpdate SequencerPlayback::update(uint64_t nowUs) {
   result.elapsedSteps = stepClock_.poll(nowUs).elapsed_intervals;
   if (result.elapsedSteps == 0) return result;
 
-  result.previousStep = editor_.currentStep();
-  // Audio events whose deadlines are already in the past cannot be recovered
-  // in real time. Advance to the present and discard overdue triggers.
-  result.patternBoundary = editor_.advanceByElapsedSteps(result.elapsedSteps);
-  result.patternChanged = editor_.patternChangedAtBoundary();
+  const PlaybackStepDecision decision =
+      SequencerPlaybackPolicy::advance(editor_, result.elapsedSteps);
+  result.previousStep = decision.previousStep;
+  result.patternBoundary = decision.patternBoundary;
+  result.patternChanged = decision.patternChanged;
   if (result.patternChanged) {
     Serial.printf("pattern: switched current=%u next=%u\n",
                   editor_.currentPattern() + 1, editor_.nextPattern() + 1);
   }
-  if (result.elapsedSteps == 1) {
+  if (decision.triggerCurrentStep) {
     triggerCurrentStep();
   } else {
     Serial.printf("transport: skipped_steps count=%lu\n",
