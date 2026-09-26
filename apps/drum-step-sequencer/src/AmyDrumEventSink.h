@@ -10,8 +10,8 @@ class AmyDrumEventSink final : public SequencerEventSink {
       : audioGate_(audioGate), drumSlot_(drumSlot) {}
 
   void wake(uint32_t tailMs) override { audioGate_.wake(tailMs); }
-  void trigger(uint8_t soundId, float velocity) override {
-    drumSlot_.noteOn(soundId, velocity);
+  void trigger(const SequencerEvent& event) override {
+    drumSlot_.noteOn(event.soundId, 1.0f);
   }
 
  private:

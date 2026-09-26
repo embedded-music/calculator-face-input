@@ -13,6 +13,10 @@ AMY's MIDI-note API, but that implementation detail no longer leaks into the
 sequencer's output contract. A PCM sink can map the same trigger to a sample,
 while a melodic backend may later expose a richer note event type of its own.
 
+The first `SequencerEvent` contains only `soundId`. Velocity was intentionally
+left out while every drum hit uses the same fixed level; it can be added when a
+real accent or dynamics feature needs it.
+
 ## Verification
 
 The existing native playback test and the Core Gray firmware build are rerun

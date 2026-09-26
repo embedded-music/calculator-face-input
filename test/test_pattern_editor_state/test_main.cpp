@@ -27,9 +27,9 @@ class FakeEventSink final : public SequencerEventSink {
     wakeCount++;
     lastTailMs = tailMs;
   }
-  void trigger(uint8_t soundId, float) override {
+  void trigger(const SequencerEvent& event) override {
     noteCount++;
-    lastSoundId = soundId;
+    lastSoundId = event.soundId;
   }
 };
 #include "../../apps/drum-step-sequencer/src/PatternEditorState.cpp"

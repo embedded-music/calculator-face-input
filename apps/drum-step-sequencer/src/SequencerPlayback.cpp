@@ -1,7 +1,6 @@
 #include "SequencerPlayback.h"
 
 namespace {
-constexpr float DRUM_VELOCITY = 1.0f;
 constexpr uint32_t DRUM_TAIL_MS = 1500;
 }  // namespace
 
@@ -10,7 +9,8 @@ void SequencerPlayback::triggerCurrentStep() {
   for (uint8_t track = 0; track < TRACK_COUNT; track++) {
     if (editor_.stepActive(track, editor_.currentStep())) {
       if (!hasTrigger) eventSink_.wake(DRUM_TAIL_MS);
-      eventSink_.trigger(editor_.soundForTrack(track).midiNote, DRUM_VELOCITY);
+      eventSink_.trigger(
+          SequencerEvent{editor_.soundForTrack(track).midiNote});
       hasTrigger = true;
     }
   }
