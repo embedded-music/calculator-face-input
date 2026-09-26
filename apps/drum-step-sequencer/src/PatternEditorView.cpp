@@ -296,22 +296,19 @@ void PatternEditorView::drawArrangementValuesContent(
       uint16_t fill = COLOR_STEP_OFF;
       uint16_t border = COLOR_GRID;
       const char* label = CALCULATOR_KEY_LABELS[row][column];
+      bool chainCell = false;
+      uint8_t chainPosition = 0;
 
       if (row == 0) {
         fill = COLOR_SELECTED;
         border = state.nextPattern() == column ? COLOR_PLAYHEAD : COLOR_GRID;
         label = PATTERN_KEYS[column];
       } else if (column < 3) {
-        const uint8_t position = static_cast<uint8_t>((row - 1) * 3 + column);
-        const bool active = position < state.chainLength();
+        chainCell = true;
+        chainPosition = static_cast<uint8_t>((row - 1) * 3 + column);
+        const bool active = chainPosition < state.chainLength();
         fill = active ? COLOR_STEP_ON : COLOR_STEP_OFF;
-        if (position == state.chainPosition()) border = COLOR_PLAYHEAD;
-        else if (active && position ==
-                 static_cast<uint8_t>((state.chainPosition() + 1) %
-                                      state.chainLength())) {
-          border = COLOR_SELECTED;
-        }
-        label = PATTERN_KEYS[state.chainPatternAt(position)];
+        label = PATTERN_KEYS[state.chainPatternAt(chainPosition)];
       } else if (row == 1 || row == 2) {
         border = COLOR_SELECTED;
       }
@@ -326,6 +323,16 @@ void PatternEditorView::drawArrangementValuesContent(
       display_.drawString(label, x + (KEY_WIDTH - 3) / 2,
                           y + (KEY_HEIGHT - 3) / 2);
       display_.setTextDatum(TL_DATUM);
+      if (chainCell && chainPosition < state.chainLength()) {
+        const bool current = chainPosition == state.chainPosition();
+        const bool next = chainPosition == static_cast<uint8_t>(
+                                             (state.chainPosition() + 1) %
+                                             state.chainLength());
+        if (current || next) {
+          display_.fillRect(x + 3, y + KEY_HEIGHT - 8, KEY_WIDTH - 9, 4,
+                            current ? COLOR_PLAYHEAD : COLOR_SELECTED);
+        }
+      }
     }
   }
 }

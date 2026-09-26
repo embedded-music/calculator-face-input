@@ -24,6 +24,7 @@ the current slot and the upcoming slot without redrawing the whole screen.
 - Build with `just build-sequencer`.
 - Flash the Core Gray and press C to inspect the 5-by-4 matrix.
 - Confirm the top row is yellow, chain slots are cyan while active, and the
-  current/upcoming slots have distinct borders.
+  current/upcoming slots have horizontal bars at the bottom of their cells
+  (magenta for current and yellow for next), matching the main playhead.
 - Use `*` and `-` to test the 2–12 bounds, then select patterns in the top row
   and verify that the chain advances at the end of each sixteen-step cycle.
