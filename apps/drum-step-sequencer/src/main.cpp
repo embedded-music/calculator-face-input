@@ -91,7 +91,8 @@ void loop() {
                     static_cast<unsigned long>(elapsedSteps));
     }
     if (input.mode() == UiMode::Pattern) {
-      view.drawPlayheadChange(editor, previousStep);
+      if (patternBoundary) view.drawPatternChange(editor);
+      else view.drawPlayheadChange(editor, previousStep);
     } else if (patternBoundary && input.mode() == UiMode::Arrangement) {
       view.drawArrangementValues(editor);
     }

@@ -126,6 +126,17 @@ void PatternEditorView::draw(const PatternEditorState& state) {
   display_.endWrite();
 }
 
+void PatternEditorView::drawPatternChange(const PatternEditorState& state) {
+  display_.startWrite();
+  drawHeader(state);
+  drawBeatMarkers();
+  for (uint8_t track = 0; track < TRACK_COUNT; track++) {
+    drawTrack(state, track);
+  }
+  drawFooter(state);
+  display_.endWrite();
+}
+
 void PatternEditorView::drawSettingsLegends(const PatternEditorState& state) {
   constexpr int16_t LEGEND_Y = 204;
   constexpr int16_t LEGEND_WIDTH = 96;

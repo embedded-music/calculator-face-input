@@ -15,6 +15,7 @@ class PatternEditorView {
                            uint8_t previousSoundIndex);
   void drawArrangement(const PatternEditorState& state);
   void drawArrangementValues(const PatternEditorState& state);
+  void drawPatternChange(const PatternEditorState& state);
   void drawTrack(const PatternEditorState& state, uint8_t track);
   void drawStep(const PatternEditorState& state, uint8_t track, uint8_t step);
   void drawPlayheadChange(const PatternEditorState& state,
