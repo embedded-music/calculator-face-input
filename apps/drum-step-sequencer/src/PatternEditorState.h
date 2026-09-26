@@ -5,24 +5,7 @@
 #include "DrumSounds.h"
 #include "PatternBank.h"
 #include "PatternChain.h"
-
-constexpr uint16_t MIN_TEMPO_BPM = 40;
-constexpr uint16_t MAX_TEMPO_BPM = 240;
-constexpr uint16_t TEMPO_INCREMENT_BPM = 5;
-constexpr uint8_t VOLUME_INCREMENT = 16;
-
-enum class StepRate : uint8_t {
-  Whole,
-  Half,
-  Quarter,
-  QuarterTriplet,
-  Eighth,
-  EighthTriplet,
-  Sixteenth,
-  SixteenthTriplet,
-  ThirtySecond,
-  ThirtySecondTriplet,
-};
+#include "SequencerSettings.h"
 
 class PatternEditorState {
  public:
@@ -44,11 +27,11 @@ class PatternEditorState {
   uint8_t chainPatternAt(uint8_t position) const {
     return chain_.patternAt(position);
   }
-  uint16_t tempoBpm() const { return tempoBpm_; }
-  uint64_t stepIntervalUs() const;
-  StepRate stepRate() const { return stepRate_; }
-  const char* stepRateName() const;
-  uint8_t speakerVolume() const { return speakerVolume_; }
+  uint16_t tempoBpm() const { return settings_.tempoBpm(); }
+  uint64_t stepIntervalUs() const { return settings_.stepIntervalUs(); }
+  StepRate stepRate() const { return settings_.stepRate(); }
+  const char* stepRateName() const { return settings_.stepRateName(); }
+  uint8_t speakerVolume() const { return settings_.speakerVolume(); }
   uint8_t selectedSoundIndex() const;
   const DrumSound& selectedSound() const {
     return DRUM_SOUNDS[selectedSoundIndex()];
@@ -69,12 +52,12 @@ class PatternEditorState {
   void clearPattern(uint8_t pattern);
   void toggleCloneMode() { cloneMode_ = !cloneMode_; }
   bool toggleChainPosition(uint8_t position);
-  bool decreaseTempo();
-  bool increaseTempo();
-  bool decreaseRate();
-  bool increaseRate();
-  bool decreaseVolume();
-  bool increaseVolume();
+  bool decreaseTempo() { return settings_.decreaseTempo(); }
+  bool increaseTempo() { return settings_.increaseTempo(); }
+  bool decreaseRate() { return settings_.decreaseRate(); }
+  bool increaseRate() { return settings_.increaseRate(); }
+  bool decreaseVolume() { return settings_.decreaseVolume(); }
+  bool increaseVolume() { return settings_.increaseVolume(); }
   void selectSound(uint8_t soundIndex);
 
  private:
@@ -86,8 +69,6 @@ class PatternEditorState {
   PatternChain chain_;
   bool patternChangedAtBoundary_ = false;
   bool cloneMode_ = false;
-  uint16_t tempoBpm_ = 120;
-  StepRate stepRate_ = StepRate::Sixteenth;
-  uint8_t speakerVolume_ = 128;
+  SequencerSettings settings_;
 
 };

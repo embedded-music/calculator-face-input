@@ -2,6 +2,7 @@
 
 #include "../../apps/drum-step-sequencer/src/PatternBank.cpp"
 #include "../../apps/drum-step-sequencer/src/PatternChain.cpp"
+#include "../../apps/drum-step-sequencer/src/SequencerSettings.cpp"
 #include "../../apps/drum-step-sequencer/src/PatternEditorState.cpp"
 
 void test_sparse_chain_advances_only_enabled_positions() {
@@ -57,10 +58,45 @@ void test_clone_and_clear_preserve_sound_choices() {
   TEST_ASSERT_EQUAL_UINT8(originalSound, state.soundForTrack(0).midiNote);
 }
 
+void test_settings_clamp_and_rate_boundaries() {
+  SequencerSettings settings;
+
+  while (settings.decreaseTempo()) {
+  }
+  TEST_ASSERT_EQUAL_UINT16(MIN_TEMPO_BPM, settings.tempoBpm());
+  TEST_ASSERT_FALSE(settings.decreaseTempo());
+
+  while (settings.increaseTempo()) {
+  }
+  TEST_ASSERT_EQUAL_UINT16(MAX_TEMPO_BPM, settings.tempoBpm());
+  TEST_ASSERT_FALSE(settings.increaseTempo());
+
+  while (settings.decreaseVolume()) {
+  }
+  TEST_ASSERT_EQUAL_UINT8(0, settings.speakerVolume());
+  TEST_ASSERT_FALSE(settings.decreaseVolume());
+
+  while (settings.increaseVolume()) {
+  }
+  TEST_ASSERT_EQUAL_UINT8(UINT8_MAX, settings.speakerVolume());
+  TEST_ASSERT_FALSE(settings.increaseVolume());
+
+  while (settings.decreaseRate()) {
+  }
+  TEST_ASSERT_EQUAL_STRING("1/1", settings.stepRateName());
+  TEST_ASSERT_FALSE(settings.decreaseRate());
+
+  while (settings.increaseRate()) {
+  }
+  TEST_ASSERT_EQUAL_STRING("1/32T", settings.stepRateName());
+  TEST_ASSERT_FALSE(settings.increaseRate());
+}
+
 int main() {
   UNITY_BEGIN();
   RUN_TEST(test_sparse_chain_advances_only_enabled_positions);
   RUN_TEST(test_current_chain_position_removal_is_quantized);
   RUN_TEST(test_clone_and_clear_preserve_sound_choices);
+  RUN_TEST(test_settings_clamp_and_rate_boundaries);
   return UNITY_END();
 }
