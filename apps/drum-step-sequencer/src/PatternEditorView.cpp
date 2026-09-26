@@ -286,6 +286,7 @@ void PatternEditorView::drawArrangementValuesContent(
     display_.fillRect(VALUE_X - 4, y, VALUE_WIDTH, VALUE_HEIGHT,
                       COLOR_BACKGROUND);
   }
+  display_.setTextSize(2);
   display_.setTextColor(COLOR_TEXT, COLOR_BACKGROUND);
   display_.setCursor(16, 58);
   display_.printf("Current = %s", PATTERN_KEYS[state.currentPattern()]);
