@@ -6,6 +6,7 @@
 
 constexpr uint8_t TRACK_COUNT = 4;
 constexpr uint8_t STEP_COUNT = 16;
+constexpr uint8_t PATTERN_SLOT_COUNT = 4;
 constexpr uint16_t MIN_TEMPO_BPM = 40;
 constexpr uint16_t MAX_TEMPO_BPM = 240;
 constexpr uint16_t TEMPO_INCREMENT_BPM = 5;
@@ -26,16 +27,17 @@ enum class StepRate : uint8_t {
 
 class PatternEditorState {
  public:
+  PatternEditorState();
   uint8_t selectedTrack() const { return selectedTrack_; }
   uint8_t currentStep() const { return currentStep_; }
+  uint8_t currentPattern() const { return currentPattern_; }
+  uint8_t nextPattern() const { return nextPattern_; }
   uint16_t tempoBpm() const { return tempoBpm_; }
   uint64_t stepIntervalUs() const;
   StepRate stepRate() const { return stepRate_; }
   const char* stepRateName() const;
   uint8_t speakerVolume() const { return speakerVolume_; }
-  uint8_t selectedSoundIndex() const {
-    return soundIndices_[selectedTrack_];
-  }
+  uint8_t selectedSoundIndex() const;
   const DrumSound& selectedSound() const {
     return DRUM_SOUNDS[selectedSoundIndex()];
   }
@@ -45,7 +47,9 @@ class PatternEditorState {
   bool toggleStep(uint8_t step);
   // Move the logical playhead to the present after one or more deadlines.
   // Missed steps are intentionally not replayed as audio bursts.
-  void advanceByElapsedSteps(uint32_t elapsedSteps);
+  // Returns true when the 16-step pattern boundary was crossed.
+  bool advanceByElapsedSteps(uint32_t elapsedSteps);
+  void selectNextPattern(uint8_t pattern);
   bool decreaseTempo();
   bool increaseTempo();
   bool decreaseRate();
@@ -55,11 +59,17 @@ class PatternEditorState {
   void selectSound(uint8_t soundIndex);
 
  private:
-  bool steps_[TRACK_COUNT][STEP_COUNT]{};
+  struct PatternData {
+    bool steps[TRACK_COUNT][STEP_COUNT]{};
+    uint8_t soundIndices[TRACK_COUNT]{};
+  };
+
+  PatternData patterns_[PATTERN_SLOT_COUNT]{};
   uint8_t selectedTrack_ = 0;
   uint8_t currentStep_ = 0;
+  uint8_t currentPattern_ = 0;
+  uint8_t nextPattern_ = 0;
   uint16_t tempoBpm_ = 120;
   StepRate stepRate_ = StepRate::Sixteenth;
   uint8_t speakerVolume_ = 128;
-  uint8_t soundIndices_[TRACK_COUNT] = {0, 4, 10, 18};
 };

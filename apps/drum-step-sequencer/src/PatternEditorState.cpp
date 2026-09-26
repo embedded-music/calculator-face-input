@@ -17,10 +17,20 @@ constexpr RateRatio RATE_RATIOS[] = {
 };
 
 constexpr size_t RATE_COUNT = sizeof(RATE_RATIOS) / sizeof(RATE_RATIOS[0]);
+constexpr uint8_t DEFAULT_SOUND_INDICES[TRACK_COUNT] = {0, 4, 10, 18};
 }  // namespace
 
+PatternEditorState::PatternEditorState() {
+  for (uint8_t pattern = 0; pattern < PATTERN_SLOT_COUNT; pattern++) {
+    for (uint8_t track = 0; track < TRACK_COUNT; track++) {
+      patterns_[pattern].soundIndices[track] = DEFAULT_SOUND_INDICES[track];
+    }
+  }
+}
+
 bool PatternEditorState::stepActive(uint8_t track, uint8_t step) const {
-  return track < TRACK_COUNT && step < STEP_COUNT && steps_[track][step];
+  return track < TRACK_COUNT && step < STEP_COUNT &&
+         patterns_[currentPattern_].steps[track][step];
 }
 
 uint64_t PatternEditorState::stepIntervalUs() const {
@@ -34,7 +44,12 @@ const char* PatternEditorState::stepRateName() const {
 }
 
 const DrumSound& PatternEditorState::soundForTrack(uint8_t track) const {
-  return DRUM_SOUNDS[soundIndices_[track < TRACK_COUNT ? track : 0]];
+  return DRUM_SOUNDS[
+      patterns_[currentPattern_].soundIndices[track < TRACK_COUNT ? track : 0]];
+}
+
+uint8_t PatternEditorState::selectedSoundIndex() const {
+  return patterns_[currentPattern_].soundIndices[selectedTrack_];
 }
 
 void PatternEditorState::selectTrack(uint8_t track) {
@@ -43,15 +58,23 @@ void PatternEditorState::selectTrack(uint8_t track) {
 
 bool PatternEditorState::toggleStep(uint8_t step) {
   if (step >= STEP_COUNT) return false;
-  bool& active = steps_[selectedTrack_][step];
+  bool& active = patterns_[currentPattern_].steps[selectedTrack_][step];
   active = !active;
   return active;
 }
 
-void PatternEditorState::advanceByElapsedSteps(uint32_t elapsedSteps) {
-  if (elapsedSteps == 0) return;
+bool PatternEditorState::advanceByElapsedSteps(uint32_t elapsedSteps) {
+  if (elapsedSteps == 0) return false;
+  const bool crossedBoundary =
+      elapsedSteps >= STEP_COUNT || currentStep_ + elapsedSteps >= STEP_COUNT;
   currentStep_ = static_cast<uint8_t>(
       (currentStep_ + (elapsedSteps % STEP_COUNT)) % STEP_COUNT);
+  if (crossedBoundary) currentPattern_ = nextPattern_;
+  return crossedBoundary;
+}
+
+void PatternEditorState::selectNextPattern(uint8_t pattern) {
+  if (pattern < PATTERN_SLOT_COUNT) nextPattern_ = pattern;
 }
 
 bool PatternEditorState::decreaseTempo() {
@@ -102,6 +125,6 @@ bool PatternEditorState::increaseVolume() {
 
 void PatternEditorState::selectSound(uint8_t soundIndex) {
   if (soundIndex < DRUM_SOUND_COUNT) {
-    soundIndices_[selectedTrack_] = soundIndex;
+    patterns_[currentPattern_].soundIndices[selectedTrack_] = soundIndex;
   }
 }

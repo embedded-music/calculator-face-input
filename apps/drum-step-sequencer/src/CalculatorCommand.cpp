@@ -32,3 +32,14 @@ bool soundIndexForCalculatorValue(uint8_t value, uint8_t& soundIndex) {
   }
   return false;
 }
+
+bool patternIndexForCalculatorValue(uint8_t value, uint8_t& patternIndex) {
+  constexpr uint8_t patternValues[] = {'A', 'M', '%', '/'};
+  for (uint8_t index = 0; index < sizeof(patternValues); index++) {
+    if (patternValues[index] == value) {
+      patternIndex = index;
+      return true;
+    }
+  }
+  return false;
+}

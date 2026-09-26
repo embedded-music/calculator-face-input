@@ -79,7 +79,11 @@ void loop() {
     // and discard all overdue triggers. When more than one event elapsed,
     // wait for the next absolute deadline before emitting audio again; an
     // immediate trigger here would compress the first interval after recovery.
-    editor.advanceByElapsedSteps(elapsedSteps);
+    const bool patternBoundary = editor.advanceByElapsedSteps(elapsedSteps);
+    if (patternBoundary) {
+      Serial.printf("pattern: switched current=%u next=%u\n",
+                    editor.currentPattern() + 1, editor.nextPattern() + 1);
+    }
     if (elapsedSteps == 1) {
       triggerCurrentStep();
     } else {

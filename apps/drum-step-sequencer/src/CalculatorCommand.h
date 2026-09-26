@@ -11,3 +11,4 @@ struct CalculatorCommand {
 
 CalculatorCommand commandForCalculatorValue(uint8_t value);
 bool soundIndexForCalculatorValue(uint8_t value, uint8_t& soundIndex);
+bool patternIndexForCalculatorValue(uint8_t value, uint8_t& patternIndex);

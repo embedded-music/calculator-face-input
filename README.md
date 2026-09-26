@@ -53,12 +53,12 @@ Press a track key to select it. Press a step key to toggle that cell.
   pattern.
 - Press **B** to toggle the sound browser for the selected track. Press it
   again to return to the pattern.
-- Press **C** to return directly to the pattern screen from any mode.
+- Press **C** to toggle the arrangement screen. It shows the current and next
+  pattern; **AC**, **M**, **%**, and **/** select the next pattern.
 
 These are press toggles rather than hold modifiers, so the Calculator can be
-played with the other hand. Chords are not required by the current interface;
-C remains the home/escape button while future pattern and transport commands
-are explored.
+played with the other hand. Chords are not required by the current interface.
+Pattern changes are applied at the end of the current sixteen-step cycle.
 
 The display shows the active mode and the relevant Calculator key legend so
 the instrument remains discoverable without a separate controller.

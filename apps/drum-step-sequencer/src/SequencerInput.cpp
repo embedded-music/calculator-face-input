@@ -63,6 +63,16 @@ void SequencerInput::handleCalculatorValue(uint8_t value, uint64_t nowUs) {
     return;
   }
 
+  if (mode_ == UiMode::Arrangement) {
+    uint8_t patternIndex = 0;
+    if (!patternIndexForCalculatorValue(value, patternIndex)) return;
+    editor_.selectNextPattern(patternIndex);
+    view_.drawArrangement(editor_);
+    Serial.printf("arrangement: action=queue_pattern next=%u\n",
+                  editor_.nextPattern() + 1);
+    return;
+  }
+
   const CalculatorCommand command = commandForCalculatorValue(value);
   if (command.type == CalculatorCommandType::SelectTrack) {
     const uint8_t previousTrack = editor_.selectedTrack();
@@ -102,9 +112,11 @@ void SequencerInput::reportCoreButtons() {
     else view_.draw(editor_);
   }
   if (M5.BtnC.wasPressed()) {
-    mode_ = UiMode::Pattern;
+    mode_ = mode_ == UiMode::Arrangement ? UiMode::Pattern
+                                          : UiMode::Arrangement;
     Serial.println("core_button: name=c action=pressed");
-    view_.draw(editor_);
+    if (mode_ == UiMode::Arrangement) view_.drawArrangement(editor_);
+    else view_.draw(editor_);
   }
 }
 

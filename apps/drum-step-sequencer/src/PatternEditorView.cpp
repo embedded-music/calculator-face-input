@@ -20,6 +20,7 @@ constexpr uint16_t COLOR_MUTED_TEXT = 0x8410;
 constexpr uint16_t COLOR_VOLUME = 0x2DDF;
 constexpr uint16_t COLOR_TEMPO = 0xFFE0;
 constexpr uint16_t COLOR_RATE = 0xF81F;
+constexpr const char* PATTERN_KEYS[] = {"AC", "M", "%", "/"};
 }  // namespace
 
 int16_t PatternEditorView::cellWidth() const {
@@ -30,15 +31,15 @@ int16_t PatternEditorView::rowHeight() const {
   return (GRID_BOTTOM - GRID_TOP) / TRACK_COUNT;
 }
 
-void PatternEditorView::drawHeader() {
+void PatternEditorView::drawHeader(const PatternEditorState& state) {
   display_.fillRect(0, 0, display_.width(), HEADER_HEIGHT, COLOR_HEADER);
   display_.setTextSize(2);
   display_.setTextColor(COLOR_TEXT, COLOR_HEADER);
   display_.setCursor(8, 8);
   display_.print("DRUM STEPS");
   display_.setTextSize(1);
-  display_.setCursor(display_.width() - 66, 12);
-  display_.print("PATTERN 1");
+  display_.setCursor(display_.width() - 72, 12);
+  display_.printf("PATTERN %s", PATTERN_KEYS[state.currentPattern()]);
 }
 
 void PatternEditorView::drawStep(const PatternEditorState& state,
@@ -118,7 +119,7 @@ void PatternEditorView::drawFooter(const PatternEditorState& state) {
 void PatternEditorView::draw(const PatternEditorState& state) {
   display_.startWrite();
   display_.fillScreen(COLOR_BACKGROUND);
-  drawHeader();
+  drawHeader(state);
   drawBeatMarkers();
   for (uint8_t track = 0; track < TRACK_COUNT; track++) drawTrack(state, track);
   drawFooter(state);
@@ -254,5 +255,29 @@ void PatternEditorView::drawSoundsSelection(
   }
   drawSoundCell(state, state.selectedSoundIndex());
   drawSoundsFooter(state);
+  display_.endWrite();
+}
+
+void PatternEditorView::drawArrangement(const PatternEditorState& state) {
+  display_.startWrite();
+  display_.fillScreen(COLOR_BACKGROUND);
+  display_.fillRect(0, 0, display_.width(), HEADER_HEIGHT, COLOR_HEADER);
+  display_.setTextSize(2);
+  display_.setTextColor(COLOR_TEXT, COLOR_HEADER);
+  display_.setCursor(8, 8);
+  display_.print("ARRANGEMENT");
+
+  display_.setTextColor(COLOR_TEXT, COLOR_BACKGROUND);
+  display_.setCursor(16, 58);
+  display_.printf("Current = %s", PATTERN_KEYS[state.currentPattern()]);
+  display_.setCursor(16, 98);
+  display_.printf("Next    = %s", PATTERN_KEYS[state.nextPattern()]);
+  display_.setCursor(16, 138);
+  display_.print("Clone   = off");
+
+  display_.setTextSize(1);
+  display_.setTextColor(COLOR_MUTED_TEXT, COLOR_BACKGROUND);
+  display_.setCursor(16, 190);
+  display_.print("AC   M   %   /   select next pattern");
   display_.endWrite();
 }

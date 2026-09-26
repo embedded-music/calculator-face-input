@@ -13,6 +13,7 @@ class PatternEditorView {
   void drawSounds(const PatternEditorState& state);
   void drawSoundsSelection(const PatternEditorState& state,
                            uint8_t previousSoundIndex);
+  void drawArrangement(const PatternEditorState& state);
   void drawTrack(const PatternEditorState& state, uint8_t track);
   void drawStep(const PatternEditorState& state, uint8_t track, uint8_t step);
   void drawPlayheadChange(const PatternEditorState& state,
@@ -22,7 +23,7 @@ class PatternEditorView {
  private:
   int16_t cellWidth() const;
   int16_t rowHeight() const;
-  void drawHeader();
+  void drawHeader(const PatternEditorState& state);
   void drawBeatMarkers();
   void drawSettingsLegends(const PatternEditorState& state);
   void drawSoundCell(const PatternEditorState& state, uint8_t soundIndex);
