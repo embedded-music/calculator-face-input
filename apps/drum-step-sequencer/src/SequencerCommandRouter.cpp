@@ -4,7 +4,7 @@
 #include <esp_timer.h>
 #include <M5Unified.h>
 
-#include "CalculatorCommand.h"
+#include "SequencerCommandMap.h"
 
 bool SequencerCommandRouter::rescheduleStepClock(uint64_t nowUs) {
   nowUs = static_cast<uint64_t>(esp_timer_get_time());
@@ -16,26 +16,28 @@ bool SequencerCommandRouter::rescheduleStepClock(uint64_t nowUs) {
 
 void SequencerCommandRouter::handleCalculatorValue(uint8_t value,
                                                    uint64_t nowUs) {
+  const SequencerCommand command = commandForMode(mode_, value);
   if (mode_ == UiMode::Settings) {
     bool changed = false;
-    if (value == '%') {
+    if (command.action == SequencerAction::VolumeDown) {
       changed = editor_.decreaseVolume();
       M5.Speaker.setVolume(editor_.speakerVolume());
-    } else if (value == '/') {
+    } else if (command.action == SequencerAction::VolumeUp) {
       changed = editor_.increaseVolume();
       M5.Speaker.setVolume(editor_.speakerVolume());
-    } else if (value == '9') {
+    } else if (command.action == SequencerAction::TempoDown) {
       changed = editor_.decreaseTempo();
-    } else if (value == '*') {
+    } else if (command.action == SequencerAction::TempoUp) {
       changed = editor_.increaseTempo();
-    } else if (value == '6') {
+    } else if (command.action == SequencerAction::RateDown) {
       changed = editor_.decreaseRate();
-    } else if (value == '-') {
+    } else if (command.action == SequencerAction::RateUp) {
       changed = editor_.increaseRate();
     } else {
       return;
     }
-    if (changed && (value == '9' || value == '*' || value == '6' || value == '-')) {
+    if (changed && command.action != SequencerAction::VolumeDown &&
+        command.action != SequencerAction::VolumeUp) {
       rescheduleStepClock(nowUs);
     }
     if (changed) view_.drawSettingsValues(editor_);
@@ -43,10 +45,9 @@ void SequencerCommandRouter::handleCalculatorValue(uint8_t value,
   }
 
   if (mode_ == UiMode::Sounds) {
-    uint8_t soundIndex = 0;
-    if (!soundIndexForCalculatorValue(value, soundIndex)) return;
+    if (command.action != SequencerAction::SelectSound) return;
     const uint8_t previousSoundIndex = editor_.selectedSoundIndex();
-    editor_.selectSound(soundIndex);
+    editor_.selectSound(command.index);
     view_.drawSoundsSelection(editor_, previousSoundIndex);
     const DrumSound& sound = editor_.selectedSound();
     Serial.printf("editor: action=select_sound track=%u midi_note=%u name=%s\n",
@@ -55,14 +56,14 @@ void SequencerCommandRouter::handleCalculatorValue(uint8_t value,
   }
 
   if (mode_ == UiMode::Arrangement) {
-    if (value == '*') {
+    if (command.action == SequencerAction::ToggleClone) {
       editor_.toggleCloneMode();
       view_.drawArrangementValues(editor_);
       Serial.printf("arrangement: action=clone_mode value=%s\n",
                     editor_.cloneMode() ? "on" : "off");
       return;
     }
-    if (value == '=') {
+    if (command.action == SequencerAction::ClearPattern) {
       const uint8_t targetPattern = editor_.nextPattern();
       editor_.clearPattern(targetPattern);
       view_.drawArrangementValues(editor_);
@@ -70,24 +71,19 @@ void SequencerCommandRouter::handleCalculatorValue(uint8_t value,
                     targetPattern + 1);
       return;
     }
-    const uint8_t chainValues[] = {
-        '7', '8', '9', '4', '5', '6', '1', '2', '3', '.', '0', '`'};
-    for (uint8_t position = 0; position < CHAIN_MAX_LENGTH; position++) {
-      if (chainValues[position] == value) {
-        if (editor_.toggleChainPosition(position)) {
+    if (command.action == SequencerAction::ToggleChainPosition) {
+        if (editor_.toggleChainPosition(command.index)) {
           view_.drawArrangementValues(editor_);
           Serial.printf(
               "arrangement: action=toggle_chain position=%u active=%s length=%u\n",
-              position + 1,
-              editor_.chainPositionEnabled(position) ? "yes" : "no",
+              command.index + 1,
+              editor_.chainPositionEnabled(command.index) ? "yes" : "no",
               editor_.chainLength());
         }
         return;
-      }
     }
-    if (value == '*' || value == '-' || value == '+' || value == '=') return;
-    uint8_t patternIndex = 0;
-    if (!patternIndexForCalculatorValue(value, patternIndex)) return;
+    if (command.action != SequencerAction::SelectPattern) return;
+    const uint8_t patternIndex = command.index;
     if (editor_.cloneMode()) {
       editor_.cloneCurrentPatternTo(patternIndex);
       Serial.printf("arrangement: action=clone_pattern source=%u target=%u\n",
@@ -100,8 +96,7 @@ void SequencerCommandRouter::handleCalculatorValue(uint8_t value,
     return;
   }
 
-  const CalculatorCommand command = commandForCalculatorValue(value);
-  if (command.type == CalculatorCommandType::SelectTrack) {
+  if (command.action == SequencerAction::SelectTrack) {
     const uint8_t previousTrack = editor_.selectedTrack();
     editor_.selectTrack(command.index);
     M5.Display.startWrite();
@@ -114,7 +109,7 @@ void SequencerCommandRouter::handleCalculatorValue(uint8_t value,
                   editor_.selectedTrack() + 1);
     return;
   }
-  if (command.type == CalculatorCommandType::ToggleStep) {
+  if (command.action == SequencerAction::ToggleStep) {
     const bool active = editor_.toggleStep(command.index);
     view_.drawStep(editor_, editor_.selectedTrack(), command.index);
     Serial.printf("editor: action=toggle_step track=%u step=%u active=%s\n",

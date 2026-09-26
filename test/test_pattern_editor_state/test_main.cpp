@@ -1,9 +1,11 @@
 #include <unity.h>
 
+#include "../../apps/drum-step-sequencer/src/CalculatorCommand.cpp"
 #include "../../apps/drum-step-sequencer/src/PatternBank.cpp"
 #include "../../apps/drum-step-sequencer/src/PatternChain.cpp"
 #include "../../apps/drum-step-sequencer/src/SequencerSettings.cpp"
 #include "../../apps/drum-step-sequencer/src/SequencerPlaybackPolicy.h"
+#include "../../apps/drum-step-sequencer/src/SequencerCommandMap.cpp"
 #include "../../apps/drum-step-sequencer/src/PatternEditorState.cpp"
 
 void test_sparse_chain_advances_only_enabled_positions() {
@@ -121,6 +123,30 @@ void test_playback_policy_reports_pattern_transition() {
   TEST_ASSERT_FALSE(decision.triggerCurrentStep);
 }
 
+void test_command_map_routes_each_mode_semantically() {
+  TEST_ASSERT_EQUAL_UINT8(static_cast<uint8_t>(SequencerAction::ToggleStep),
+                          static_cast<uint8_t>(
+                              commandForMode(UiMode::Pattern, '7').action));
+  TEST_ASSERT_EQUAL_UINT8(0, commandForMode(UiMode::Pattern, '7').index);
+
+  TEST_ASSERT_EQUAL_UINT8(static_cast<uint8_t>(SequencerAction::TempoUp),
+                          static_cast<uint8_t>(
+                              commandForMode(UiMode::Settings, '*').action));
+  TEST_ASSERT_EQUAL_UINT8(static_cast<uint8_t>(SequencerAction::SelectSound),
+                          static_cast<uint8_t>(
+                              commandForMode(UiMode::Sounds, '=').action));
+  TEST_ASSERT_EQUAL_UINT8(19, commandForMode(UiMode::Sounds, '=').index);
+
+  const SequencerCommand chain = commandForMode(UiMode::Arrangement, '0');
+  TEST_ASSERT_EQUAL_UINT8(
+      static_cast<uint8_t>(SequencerAction::ToggleChainPosition),
+      static_cast<uint8_t>(chain.action));
+  TEST_ASSERT_EQUAL_UINT8(10, chain.index);
+  TEST_ASSERT_EQUAL_UINT8(static_cast<uint8_t>(SequencerAction::ClearPattern),
+                          static_cast<uint8_t>(
+                              commandForMode(UiMode::Arrangement, '=').action));
+}
+
 int main() {
   UNITY_BEGIN();
   RUN_TEST(test_sparse_chain_advances_only_enabled_positions);
@@ -129,5 +155,6 @@ int main() {
   RUN_TEST(test_settings_clamp_and_rate_boundaries);
   RUN_TEST(test_playback_policy_triggers_only_on_time);
   RUN_TEST(test_playback_policy_reports_pattern_transition);
+  RUN_TEST(test_command_map_routes_each_mode_semantically);
   return UNITY_END();
 }
