@@ -3,11 +3,9 @@
 #include <stdint.h>
 
 #include "DrumSounds.h"
+#include "PatternBank.h"
 #include "PatternChain.h"
 
-constexpr uint8_t TRACK_COUNT = 4;
-constexpr uint8_t STEP_COUNT = 16;
-constexpr uint8_t PATTERN_SLOT_COUNT = 4;
 constexpr uint16_t MIN_TEMPO_BPM = 40;
 constexpr uint16_t MAX_TEMPO_BPM = 240;
 constexpr uint16_t TEMPO_INCREMENT_BPM = 5;
@@ -80,12 +78,7 @@ class PatternEditorState {
   void selectSound(uint8_t soundIndex);
 
  private:
-  struct PatternData {
-    bool steps[TRACK_COUNT][STEP_COUNT]{};
-    uint8_t soundIndices[TRACK_COUNT]{};
-  };
-
-  PatternData patterns_[PATTERN_SLOT_COUNT]{};
+  PatternBank patterns_;
   uint8_t selectedTrack_ = TRACK_COUNT - 1;
   uint8_t currentStep_ = 0;
   uint8_t currentPattern_ = 0;
