@@ -18,16 +18,18 @@ constexpr uint16_t COLOR_MUTED_TEXT = 0x8410;
 constexpr uint16_t COLOR_VOLUME = 0x2DDF;
 constexpr uint16_t COLOR_TEMPO = 0xFFE0;
 constexpr uint16_t COLOR_RATE = 0xF81F;
+constexpr uint16_t COLOR_SWING = 0xFD20;
 constexpr const char* PATTERN_KEYS[] = {"AC", "M", "%", "/"};
 }  // namespace
 
 void PatternEditorView::drawSettingsLegends(const PatternEditorState& state) {
   constexpr int16_t LEGEND_Y = 204;
-  constexpr int16_t LEGEND_WIDTH = 96;
-  const uint16_t legendColors[] = {COLOR_VOLUME, COLOR_TEMPO, COLOR_RATE};
-  const char* legendLabels[] = {"VOLUME", "TEMPO", "RATE"};
-  for (uint8_t index = 0; index < 3; index++) {
-    const int16_t x = 8 + index * 104;
+  constexpr int16_t LEGEND_WIDTH = 72;
+  const uint16_t legendColors[] = {COLOR_VOLUME, COLOR_TEMPO, COLOR_RATE,
+                                   COLOR_SWING};
+  const char* legendLabels[] = {"VOLUME", "TEMPO", "RATE", "SWING"};
+  for (uint8_t index = 0; index < 4; index++) {
+    const int16_t x = 8 + index * 76;
     display_.fillRect(x, LEGEND_Y, LEGEND_WIDTH, 29, legendColors[index]);
     display_.setTextColor(COLOR_BACKGROUND, legendColors[index]);
     display_.setTextSize(1);
@@ -38,6 +40,10 @@ void PatternEditorView::drawSettingsLegends(const PatternEditorState& state) {
     if (index == 0) display_.printf("%u", state.speakerVolume());
     if (index == 1) display_.printf("%u", state.tempoBpm());
     if (index == 2) display_.print(state.stepRateName());
+    if (index == 3) {
+      if (state.swingActive()) display_.printf("%u%%", state.swingPercent());
+      else display_.print("--");
+    }
   }
 }
 
@@ -57,6 +63,7 @@ void PatternEditorView::drawSettings(const PatternEditorState& state) {
       if (row == 0 && column >= 2) fill = COLOR_VOLUME;
       if (row == 1 && column >= 2) fill = COLOR_TEMPO;
       if (row == 2 && column >= 2) fill = COLOR_RATE;
+      if (row == 3 && column >= 2) fill = COLOR_SWING;
       const int16_t x = KEY_X + column * KEY_WIDTH;
       const int16_t y = KEY_Y + row * KEY_HEIGHT;
       display_.fillRect(x, y, KEY_WIDTH - 3, KEY_HEIGHT - 3, fill);

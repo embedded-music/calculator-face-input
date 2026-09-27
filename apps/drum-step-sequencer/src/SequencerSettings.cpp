@@ -29,6 +29,10 @@ const char* SequencerSettings::stepRateName() const {
   return RATE_RATIOS[static_cast<size_t>(stepRate_)].name;
 }
 
+bool SequencerSettings::swingActive() const {
+  return RATE_RATIOS[static_cast<size_t>(stepRate_)].beatsDenominator % 3 != 0;
+}
+
 bool SequencerSettings::decreaseTempo() {
   const uint16_t previous = tempoBpm_;
   tempoBpm_ = tempoBpm_ > MIN_TEMPO_BPM + TEMPO_INCREMENT_BPM
@@ -73,4 +77,16 @@ bool SequencerSettings::increaseVolume() {
                        ? speakerVolume_ + VOLUME_INCREMENT
                        : UINT8_MAX;
   return speakerVolume_ != previous;
+}
+
+bool SequencerSettings::decreaseSwing() {
+  if (swingPercent_ == MIN_SWING_PERCENT) return false;
+  swingPercent_--;
+  return true;
+}
+
+bool SequencerSettings::increaseSwing() {
+  if (swingPercent_ == MAX_SWING_PERCENT) return false;
+  swingPercent_++;
+  return true;
 }

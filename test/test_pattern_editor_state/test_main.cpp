@@ -8,6 +8,7 @@
 #include "../../apps/drum-step-sequencer/src/StepVelocity.h"
 #include "../../apps/drum-step-sequencer/src/SequencerCommandMap.cpp"
 #include "../../apps/drum-step-sequencer/src/SequencerPlayback.cpp"
+#include "../../apps/drum-step-sequencer/src/SequencerStepClock.h"
 
 class FakeClock final : public SequencerClock {
  public:
@@ -49,6 +50,28 @@ void test_step_levels_have_distinct_ordered_velocities() {
                    velocityForStepLevel(StepLevel::Normal));
   TEST_ASSERT_TRUE(velocityForStepLevel(StepLevel::Normal) <
                    velocityForStepLevel(StepLevel::Strong));
+}
+
+void test_swing_clock_alternates_without_changing_pair_duration() {
+  SequencerStepClock clock;
+  TEST_ASSERT_TRUE(clock.begin(0, 100, 60, true));
+  TEST_ASSERT_EQUAL_UINT64(120, clock.nextDeadlineUs());
+  TEST_ASSERT_EQUAL_UINT32(1, clock.poll(120).elapsedSteps);
+  TEST_ASSERT_EQUAL_UINT64(200, clock.nextDeadlineUs());
+  TEST_ASSERT_EQUAL_UINT32(1, clock.poll(200).elapsedSteps);
+  TEST_ASSERT_EQUAL_UINT64(320, clock.nextDeadlineUs());
+  TEST_ASSERT_EQUAL_UINT32(2, clock.poll(400).elapsedSteps);
+}
+
+void test_triplet_rates_bypass_swing() {
+  SequencerSettings settings;
+  while (settings.decreaseRate()) {}
+  while (settings.stepRateName()[0] != '1' || settings.stepRateName()[2] != '4') {
+    settings.increaseRate();
+  }
+  settings.increaseRate();
+  TEST_ASSERT_EQUAL_STRING("1/4T", settings.stepRateName());
+  TEST_ASSERT_FALSE(settings.swingActive());
 }
 #include "../../apps/drum-step-sequencer/src/PatternEditorState.cpp"
 
@@ -284,6 +307,8 @@ void test_playback_reports_chain_change_then_triggers_new_pattern() {
 int main() {
   UNITY_BEGIN();
   RUN_TEST(test_step_levels_have_distinct_ordered_velocities);
+  RUN_TEST(test_swing_clock_alternates_without_changing_pair_duration);
+  RUN_TEST(test_triplet_rates_bypass_swing);
   RUN_TEST(test_sparse_chain_advances_only_enabled_positions);
   RUN_TEST(test_current_chain_position_removal_is_quantized);
   RUN_TEST(test_clone_and_clear_preserve_sound_choices);

@@ -66,6 +66,11 @@ level instead of toggling the step off.
   The **=** cell clears all steps from the currently selected next pattern,
   while preserving its sound choices.
 
+On the Settings screen, `3`/`+` decrease or increase swing from 50% (straight)
+through 75% (hard shuffle). Swing delays alternating steps without changing
+the duration of each two-step pair. Triplet rates bypass swing and show `--`;
+the selected percentage returns when a straight rate is selected again.
+
 Short A and B taps remain screen toggles; their screen action is suppressed
 when the button is used as a step modifier. Pattern changes are applied at the
 end of the current sixteen-step cycle.

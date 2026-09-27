@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-#include "DeadlineClock.h"
+#include "SequencerStepClock.h"
 #include "PatternEditorState.h"
 #include "PatternEditorView.h"
 #include "SequencerInputEvent.h"
@@ -11,7 +11,7 @@
 class SequencerCommandRouter {
  public:
   SequencerCommandRouter(PatternEditorState& editor, PatternEditorView& view,
-                         DeadlineClock& stepClock)
+                         SequencerStepClock& stepClock)
       : editor_(editor), view_(view), stepClock_(stepClock) {}
 
   void dispatch(const SequencerInputEvent& event, uint64_t nowUs);
@@ -25,6 +25,6 @@ class SequencerCommandRouter {
 
   PatternEditorState& editor_;
   PatternEditorView& view_;
-  DeadlineClock& stepClock_;
+  SequencerStepClock& stepClock_;
   UiMode mode_ = UiMode::Pattern;
 };

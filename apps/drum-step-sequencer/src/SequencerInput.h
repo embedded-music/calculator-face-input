@@ -2,14 +2,14 @@
 
 #include <stdint.h>
 
-#include "DeadlineClock.h"
 #include "HeldButtonGesture.h"
 #include "SequencerCommandRouter.h"
+#include "SequencerStepClock.h"
 
 class SequencerInput {
  public:
   SequencerInput(PatternEditorState& editor, PatternEditorView& view,
-                 DeadlineClock& stepClock)
+                 SequencerStepClock& stepClock)
       : router_(editor, view, stepClock) {}
 
   void update(uint64_t nowUs);

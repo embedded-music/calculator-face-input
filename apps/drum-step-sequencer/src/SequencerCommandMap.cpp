@@ -11,6 +11,8 @@ SequencerCommand commandForMode(UiMode mode, uint8_t value) {
     if (value == '*') return {SequencerAction::TempoUp, 0};
     if (value == '6') return {SequencerAction::RateDown, 0};
     if (value == '-') return {SequencerAction::RateUp, 0};
+    if (value == '3') return {SequencerAction::SwingDown, 0};
+    if (value == '+') return {SequencerAction::SwingUp, 0};
     return {};
   }
 

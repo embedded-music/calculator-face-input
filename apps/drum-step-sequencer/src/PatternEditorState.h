@@ -32,6 +32,8 @@ class PatternEditorState {
   StepRate stepRate() const { return settings_.stepRate(); }
   const char* stepRateName() const { return settings_.stepRateName(); }
   uint8_t speakerVolume() const { return settings_.speakerVolume(); }
+  uint8_t swingPercent() const { return settings_.swingPercent(); }
+  bool swingActive() const { return settings_.swingActive(); }
   uint8_t selectedSoundIndex() const;
   const DrumSound& selectedSound() const {
     return DRUM_SOUNDS[selectedSoundIndex()];
@@ -60,6 +62,8 @@ class PatternEditorState {
   bool increaseRate() { return settings_.increaseRate(); }
   bool decreaseVolume() { return settings_.decreaseVolume(); }
   bool increaseVolume() { return settings_.increaseVolume(); }
+  bool decreaseSwing() { return settings_.decreaseSwing(); }
+  bool increaseSwing() { return settings_.increaseSwing(); }
   void selectSound(uint8_t soundIndex);
 
  private:

@@ -8,8 +8,9 @@
 
 bool SequencerCommandRouter::rescheduleStepClock(uint64_t nowUs) {
   nowUs = static_cast<uint64_t>(esp_timer_get_time());
-  const bool rescheduled = stepClock_.reschedule(
-      nowUs, editor_.stepIntervalUs(), IntervalChangePolicy::PreservePhase);
+  const bool rescheduled = stepClock_.reconfigure(
+      nowUs, editor_.stepIntervalUs(), editor_.swingPercent(),
+      editor_.swingActive());
   if (!rescheduled) Serial.println("clock: reschedule_failed");
   return rescheduled;
 }
@@ -33,6 +34,10 @@ void SequencerCommandRouter::handleCalculatorValue(
       changed = editor_.decreaseRate();
     } else if (command.action == SequencerAction::RateUp) {
       changed = editor_.increaseRate();
+    } else if (command.action == SequencerAction::SwingDown) {
+      changed = editor_.decreaseSwing();
+    } else if (command.action == SequencerAction::SwingUp) {
+      changed = editor_.increaseSwing();
     } else {
       return;
     }

@@ -7,8 +7,7 @@
 #include "AmyM5SpeakerBridge.h"
 #include "AmySynthSlot.h"
 #include "CalculatorLink.h"
-#include "DeadlineClockAdapter.h"
-#include "DeadlineClock.h"
+#include "SequencerStepClock.h"
 #include "PatternEditorState.h"
 #include "PatternEditorView.h"
 #include "SequencerInput.h"
@@ -21,14 +20,13 @@ constexpr uint8_t AMY_DRUM_VOICES = 1;
 constexpr uint16_t AMY_GM_DRUM_PATCH = 258;
 PatternEditorState editor;
 PatternEditorView view(M5.Display);
-DeadlineClock stepClock;
+SequencerStepClock stepClock;
 SequencerInput input(editor, view, stepClock);
 AmyM5SpeakerBridge amyBridge;
 AmyAudioActivityGate audioGate(amyBridge);
 AmySynthSlot drumSlot;
 AmyDrumEventSink eventSink(audioGate, drumSlot);
-DeadlineClockAdapter playbackClock(stepClock);
-SequencerPlayback playback(editor, playbackClock, eventSink);
+SequencerPlayback playback(editor, stepClock, eventSink);
 
 bool calculatorAcknowledges() {
   Wire.beginTransmission(CALCULATOR_I2C_ADDRESS);
@@ -53,7 +51,8 @@ void setup() {
   M5.Speaker.setVolume(editor.speakerVolume());
   drumSlot.begin(AMY_SYNTH_ID, AMY_DRUM_VOICES, AMY_GM_DRUM_PATCH);
   const bool clockStarted = stepClock.begin(
-      static_cast<uint64_t>(esp_timer_get_time()), editor.stepIntervalUs());
+      static_cast<uint64_t>(esp_timer_get_time()), editor.stepIntervalUs(),
+      editor.swingPercent(), editor.swingActive());
   if (!clockStarted) Serial.println("clock: begin_failed");
   Serial.printf("drum_step_sequencer: calculator_detected=%s\n",
                 calculatorAcknowledges() ? "yes" : "no");
