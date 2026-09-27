@@ -42,7 +42,7 @@ class PatternEditorState {
   bool patternEmpty(uint8_t pattern) const;
   void selectTrack(uint8_t track);
   bool toggleStep(uint8_t step);
-  bool toggleStep(uint8_t step, StepLevel activeLevel);
+  bool setStepLevel(uint8_t step, StepLevel level);
   // Move the logical playhead to the present after one or more deadlines.
   // Missed steps are intentionally not replayed as audio bursts.
   // Returns true when crossing the 16-step boundary. The current pattern may

@@ -114,7 +114,10 @@ void SequencerCommandRouter::handleCalculatorValue(
         event.modifierA == event.modifierB
             ? StepLevel::Normal
             : event.modifierA ? StepLevel::Weak : StepLevel::Strong;
-    const bool active = editor_.toggleStep(command.index, level);
+    const bool modified = event.modifierA || event.modifierB;
+    const bool active = modified
+                            ? editor_.setStepLevel(command.index, level)
+                            : editor_.toggleStep(command.index);
     view_.drawStep(editor_, editor_.selectedTrack(), command.index);
     Serial.printf("editor: action=toggle_step track=%u step=%u active=%s level=%u\n",
                   editor_.selectedTrack() + 1, command.index + 1,

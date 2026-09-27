@@ -30,9 +30,8 @@ bool PatternEditorState::toggleStep(uint8_t step) {
   return patterns_.toggleStep(currentPattern_, selectedTrack_, step);
 }
 
-bool PatternEditorState::toggleStep(uint8_t step, StepLevel activeLevel) {
-  return patterns_.toggleStep(currentPattern_, selectedTrack_, step,
-                              activeLevel);
+bool PatternEditorState::setStepLevel(uint8_t step, StepLevel level) {
+  return patterns_.setStepLevel(currentPattern_, selectedTrack_, step, level);
 }
 
 bool PatternEditorState::advanceByElapsedSteps(uint32_t elapsedSteps) {

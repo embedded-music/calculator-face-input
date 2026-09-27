@@ -20,8 +20,9 @@ for short taps while making the modifier gesture possible.
 ## Implementation
 
 The input event carries modifier flags, and the router chooses the active
-`StepLevel` when editing a cell. Existing active cells still toggle off,
-regardless of which modifier is held.
+`StepLevel` when editing a cell. This initial version toggled existing active
+cells off regardless of which modifier was held; the replacement behavior is
+revised in the later accent-editing slice.
 
 ## Verification
 

@@ -5,6 +5,7 @@
 #include "../../apps/drum-step-sequencer/src/PatternChain.cpp"
 #include "../../apps/drum-step-sequencer/src/SequencerSettings.cpp"
 #include "../../apps/drum-step-sequencer/src/SequencerPlaybackPolicy.h"
+#include "../../apps/drum-step-sequencer/src/StepVelocity.h"
 #include "../../apps/drum-step-sequencer/src/SequencerCommandMap.cpp"
 #include "../../apps/drum-step-sequencer/src/SequencerPlayback.cpp"
 
@@ -34,6 +35,21 @@ class FakeEventSink final : public SequencerEventSink {
     lastLevel = event.level;
   }
 };
+
+void test_step_levels_have_distinct_ordered_velocities() {
+  TEST_ASSERT_FLOAT_WITHIN(0.001f, 0.0f,
+                           velocityForStepLevel(StepLevel::Off));
+  TEST_ASSERT_FLOAT_WITHIN(0.001f, 0.45f,
+                           velocityForStepLevel(StepLevel::Weak));
+  TEST_ASSERT_FLOAT_WITHIN(0.001f, 0.70f,
+                           velocityForStepLevel(StepLevel::Normal));
+  TEST_ASSERT_FLOAT_WITHIN(0.001f, 1.0f,
+                           velocityForStepLevel(StepLevel::Strong));
+  TEST_ASSERT_TRUE(velocityForStepLevel(StepLevel::Weak) <
+                   velocityForStepLevel(StepLevel::Normal));
+  TEST_ASSERT_TRUE(velocityForStepLevel(StepLevel::Normal) <
+                   velocityForStepLevel(StepLevel::Strong));
+}
 #include "../../apps/drum-step-sequencer/src/PatternEditorState.cpp"
 
 void test_sparse_chain_advances_only_enabled_positions() {
@@ -123,20 +139,24 @@ void test_settings_clamp_and_rate_boundaries() {
   TEST_ASSERT_FALSE(settings.increaseRate());
 }
 
-void test_step_levels_toggle_as_active_or_off() {
+void test_step_level_modifiers_replace_existing_level() {
   PatternEditorState state;
   state.selectTrack(0);
 
-  TEST_ASSERT_TRUE(state.toggleStep(2, StepLevel::Weak));
+  TEST_ASSERT_TRUE(state.setStepLevel(2, StepLevel::Weak));
   TEST_ASSERT_EQUAL_UINT8(static_cast<uint8_t>(StepLevel::Weak),
                           static_cast<uint8_t>(state.stepLevel(0, 2)));
 
-  TEST_ASSERT_FALSE(state.toggleStep(2, StepLevel::Strong));
-  TEST_ASSERT_EQUAL_UINT8(static_cast<uint8_t>(StepLevel::Off),
+  TEST_ASSERT_TRUE(state.setStepLevel(2, StepLevel::Strong));
+  TEST_ASSERT_EQUAL_UINT8(static_cast<uint8_t>(StepLevel::Strong),
                           static_cast<uint8_t>(state.stepLevel(0, 2)));
 
-  TEST_ASSERT_TRUE(state.toggleStep(2, StepLevel::Strong));
+  TEST_ASSERT_TRUE(state.setStepLevel(2, StepLevel::Strong));
   TEST_ASSERT_EQUAL_UINT8(static_cast<uint8_t>(StepLevel::Strong),
+                          static_cast<uint8_t>(state.stepLevel(0, 2)));
+
+  TEST_ASSERT_FALSE(state.toggleStep(2));
+  TEST_ASSERT_EQUAL_UINT8(static_cast<uint8_t>(StepLevel::Off),
                           static_cast<uint8_t>(state.stepLevel(0, 2)));
 }
 
@@ -263,11 +283,12 @@ void test_playback_reports_chain_change_then_triggers_new_pattern() {
 
 int main() {
   UNITY_BEGIN();
+  RUN_TEST(test_step_levels_have_distinct_ordered_velocities);
   RUN_TEST(test_sparse_chain_advances_only_enabled_positions);
   RUN_TEST(test_current_chain_position_removal_is_quantized);
   RUN_TEST(test_clone_and_clear_preserve_sound_choices);
   RUN_TEST(test_settings_clamp_and_rate_boundaries);
-  RUN_TEST(test_step_levels_toggle_as_active_or_off);
+  RUN_TEST(test_step_level_modifiers_replace_existing_level);
   RUN_TEST(test_playback_policy_triggers_only_on_time);
   RUN_TEST(test_playback_policy_reports_pattern_transition);
   RUN_TEST(test_command_map_routes_each_mode_semantically);

@@ -16,8 +16,8 @@ class PatternBank {
   bool stepActive(uint8_t pattern, uint8_t track, uint8_t step) const;
   StepLevel stepLevel(uint8_t pattern, uint8_t track, uint8_t step) const;
   bool toggleStep(uint8_t pattern, uint8_t track, uint8_t step);
-  bool toggleStep(uint8_t pattern, uint8_t track, uint8_t step,
-                  StepLevel activeLevel);
+  bool setStepLevel(uint8_t pattern, uint8_t track, uint8_t step,
+                    StepLevel level);
   bool patternEmpty(uint8_t pattern) const;
   uint8_t soundIndex(uint8_t pattern, uint8_t track) const;
   const DrumSound& soundForTrack(uint8_t pattern, uint8_t track) const;
