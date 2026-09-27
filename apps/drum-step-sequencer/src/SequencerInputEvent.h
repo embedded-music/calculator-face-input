@@ -12,4 +12,6 @@ enum class SequencerInputEventType : uint8_t {
 struct SequencerInputEvent {
   SequencerInputEventType type;
   uint8_t value = 0;
+  bool modifierA = false;
+  bool modifierB = false;
 };

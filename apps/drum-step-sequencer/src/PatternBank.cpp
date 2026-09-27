@@ -27,12 +27,17 @@ StepLevel PatternBank::stepLevel(uint8_t pattern, uint8_t track,
 }
 
 bool PatternBank::toggleStep(uint8_t pattern, uint8_t track, uint8_t step) {
+  return toggleStep(pattern, track, step, StepLevel::Normal);
+}
+
+bool PatternBank::toggleStep(uint8_t pattern, uint8_t track, uint8_t step,
+                             StepLevel activeLevel) {
   if (pattern >= PATTERN_SLOT_COUNT || track >= TRACK_COUNT ||
       step >= STEP_COUNT) {
     return false;
   }
   StepLevel& level = patterns_[pattern].steps[track][step];
-  level = level == StepLevel::Off ? StepLevel::Normal : StepLevel::Off;
+  level = level == StepLevel::Off ? activeLevel : StepLevel::Off;
   return level != StepLevel::Off;
 }
 

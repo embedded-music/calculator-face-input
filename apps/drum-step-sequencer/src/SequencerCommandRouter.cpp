@@ -14,9 +14,9 @@ bool SequencerCommandRouter::rescheduleStepClock(uint64_t nowUs) {
   return rescheduled;
 }
 
-void SequencerCommandRouter::handleCalculatorValue(uint8_t value,
-                                                   uint64_t nowUs) {
-  const SequencerCommand command = commandForMode(mode_, value);
+void SequencerCommandRouter::handleCalculatorValue(
+    const SequencerInputEvent& event, uint64_t nowUs) {
+  const SequencerCommand command = commandForMode(mode_, event.value);
   if (mode_ == UiMode::Settings) {
     bool changed = false;
     if (command.action == SequencerAction::VolumeDown) {
@@ -110,14 +110,18 @@ void SequencerCommandRouter::handleCalculatorValue(uint8_t value,
     return;
   }
   if (command.action == SequencerAction::ToggleStep) {
-    const bool active = editor_.toggleStep(command.index);
+    const StepLevel level =
+        event.modifierA == event.modifierB
+            ? StepLevel::Normal
+            : event.modifierA ? StepLevel::Weak : StepLevel::Strong;
+    const bool active = editor_.toggleStep(command.index, level);
     view_.drawStep(editor_, editor_.selectedTrack(), command.index);
-    Serial.printf("editor: action=toggle_step track=%u step=%u active=%s\n",
+    Serial.printf("editor: action=toggle_step track=%u step=%u active=%s level=%u\n",
                   editor_.selectedTrack() + 1, command.index + 1,
-                  active ? "yes" : "no");
+                  active ? "yes" : "no", static_cast<unsigned>(level));
     return;
   }
-  Serial.printf("editor: action=ignore value=0x%02X\n", value);
+  Serial.printf("editor: action=ignore value=0x%02X\n", event.value);
 }
 
 void SequencerCommandRouter::handleCoreButton(SequencerInputEventType button) {
@@ -142,7 +146,7 @@ void SequencerCommandRouter::handleCoreButton(SequencerInputEventType button) {
 void SequencerCommandRouter::dispatch(const SequencerInputEvent& event,
                                       uint64_t nowUs) {
   if (event.type == SequencerInputEventType::CalculatorValue) {
-    handleCalculatorValue(event.value, nowUs);
+    handleCalculatorValue(event, nowUs);
   } else {
     handleCoreButton(event.type);
   }

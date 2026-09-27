@@ -16,5 +16,8 @@ class SequencerInput {
 
  private:
   void reportCoreButtons();
+  void reportPendingCoreButtonReleases();
+  bool pendingButtonA_ = false;
+  bool pendingButtonB_ = false;
   SequencerCommandRouter router_;
 };

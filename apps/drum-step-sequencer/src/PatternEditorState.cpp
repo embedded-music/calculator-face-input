@@ -30,6 +30,11 @@ bool PatternEditorState::toggleStep(uint8_t step) {
   return patterns_.toggleStep(currentPattern_, selectedTrack_, step);
 }
 
+bool PatternEditorState::toggleStep(uint8_t step, StepLevel activeLevel) {
+  return patterns_.toggleStep(currentPattern_, selectedTrack_, step,
+                              activeLevel);
+}
+
 bool PatternEditorState::advanceByElapsedSteps(uint32_t elapsedSteps) {
   patternChangedAtBoundary_ = false;
   if (elapsedSteps == 0) return false;

@@ -18,7 +18,8 @@ class SequencerCommandRouter {
   UiMode mode() const { return mode_; }
 
  private:
-  void handleCalculatorValue(uint8_t value, uint64_t nowUs);
+  void handleCalculatorValue(const SequencerInputEvent& event,
+                             uint64_t nowUs);
   void handleCoreButton(SequencerInputEventType button);
   bool rescheduleStepClock(uint64_t nowUs);
 
