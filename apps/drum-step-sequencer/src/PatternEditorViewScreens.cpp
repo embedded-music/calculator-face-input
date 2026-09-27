@@ -60,10 +60,10 @@ void PatternEditorView::drawSettings(const PatternEditorState& state) {
     for (uint8_t column = 0; column < 4; column++) {
       uint16_t fill = COLOR_STEP_OFF;
       const char* key = CALCULATOR_KEY_LABELS[row][column];
-      if (row == 0 && column >= 2) fill = COLOR_VOLUME;
-      if (row == 1 && column >= 2) fill = COLOR_TEMPO;
-      if (row == 2 && column >= 2) fill = COLOR_RATE;
-      if (row == 3 && column >= 2) fill = COLOR_SWING;
+      if (row == 0 && column < 2) fill = COLOR_VOLUME;
+      if (row == 0 && column >= 2) fill = COLOR_TEMPO;
+      if (row == 1 && column < 2) fill = COLOR_RATE;
+      if (row == 1 && column >= 2) fill = COLOR_SWING;
       const int16_t x = KEY_X + column * KEY_WIDTH;
       const int16_t y = KEY_Y + row * KEY_HEIGHT;
       display_.fillRect(x, y, KEY_WIDTH - 3, KEY_HEIGHT - 3, fill);

@@ -5,14 +5,14 @@
 
 SequencerCommand commandForMode(UiMode mode, uint8_t value) {
   if (mode == UiMode::Settings) {
-    if (value == '%') return {SequencerAction::VolumeDown, 0};
-    if (value == '/') return {SequencerAction::VolumeUp, 0};
-    if (value == '9') return {SequencerAction::TempoDown, 0};
-    if (value == '*') return {SequencerAction::TempoUp, 0};
-    if (value == '6') return {SequencerAction::RateDown, 0};
-    if (value == '-') return {SequencerAction::RateUp, 0};
-    if (value == '3') return {SequencerAction::SwingDown, 0};
-    if (value == '+') return {SequencerAction::SwingUp, 0};
+    if (value == 'A') return {SequencerAction::VolumeDown, 0};
+    if (value == 'M') return {SequencerAction::VolumeUp, 0};
+    if (value == '%') return {SequencerAction::TempoDown, 0};
+    if (value == '/') return {SequencerAction::TempoUp, 0};
+    if (value == '7') return {SequencerAction::RateDown, 0};
+    if (value == '8') return {SequencerAction::RateUp, 0};
+    if (value == '9') return {SequencerAction::SwingDown, 0};
+    if (value == '*') return {SequencerAction::SwingUp, 0};
     return {};
   }
 

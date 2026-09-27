@@ -217,9 +217,18 @@ void test_command_map_routes_each_mode_semantically() {
                               commandForMode(UiMode::Pattern, '7').action));
   TEST_ASSERT_EQUAL_UINT8(0, commandForMode(UiMode::Pattern, '7').index);
 
-  TEST_ASSERT_EQUAL_UINT8(static_cast<uint8_t>(SequencerAction::TempoUp),
-                          static_cast<uint8_t>(
-                              commandForMode(UiMode::Settings, '*').action));
+  const uint8_t settingKeys[] = {'A', 'M', '%', '/', '7', '8', '9', '*'};
+  const SequencerAction settingActions[] = {
+      SequencerAction::VolumeDown, SequencerAction::VolumeUp,
+      SequencerAction::TempoDown, SequencerAction::TempoUp,
+      SequencerAction::RateDown, SequencerAction::RateUp,
+      SequencerAction::SwingDown, SequencerAction::SwingUp};
+  for (uint8_t index = 0; index < 8; index++) {
+    TEST_ASSERT_EQUAL_UINT8(
+        static_cast<uint8_t>(settingActions[index]),
+        static_cast<uint8_t>(
+            commandForMode(UiMode::Settings, settingKeys[index]).action));
+  }
   TEST_ASSERT_EQUAL_UINT8(static_cast<uint8_t>(SequencerAction::SelectSound),
                           static_cast<uint8_t>(
                               commandForMode(UiMode::Sounds, '=').action));
