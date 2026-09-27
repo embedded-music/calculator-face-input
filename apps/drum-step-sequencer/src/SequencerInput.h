@@ -3,6 +3,7 @@
 #include <stdint.h>
 
 #include "DeadlineClock.h"
+#include "HeldButtonGesture.h"
 #include "SequencerCommandRouter.h"
 
 class SequencerInput {
@@ -17,7 +18,7 @@ class SequencerInput {
  private:
   void reportCoreButtons();
   void reportPendingCoreButtonReleases();
-  bool pendingButtonA_ = false;
-  bool pendingButtonB_ = false;
+  HeldButtonGesture buttonA_;
+  HeldButtonGesture buttonB_;
   SequencerCommandRouter router_;
 };

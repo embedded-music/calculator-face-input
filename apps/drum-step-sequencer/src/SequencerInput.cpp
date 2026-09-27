@@ -18,10 +18,10 @@ bool readCalculatorByte(uint8_t& value) {
 
 void SequencerInput::reportCoreButtons() {
   if (M5.BtnA.wasPressed()) {
-    pendingButtonA_ = true;
+    buttonA_.press();
   }
   if (M5.BtnB.wasPressed()) {
-    pendingButtonB_ = true;
+    buttonB_.press();
   }
   if (M5.BtnC.wasPressed()) {
     router_.dispatch({SequencerInputEventType::ButtonC}, 0);
@@ -29,13 +29,15 @@ void SequencerInput::reportCoreButtons() {
 }
 
 void SequencerInput::reportPendingCoreButtonReleases() {
-  if (pendingButtonA_ && M5.BtnA.wasReleased()) {
-    pendingButtonA_ = false;
-    router_.dispatch({SequencerInputEventType::ButtonA}, 0);
+  if (M5.BtnA.wasReleased()) {
+    if (buttonA_.releaseAsTap()) {
+      router_.dispatch({SequencerInputEventType::ButtonA}, 0);
+    }
   }
-  if (pendingButtonB_ && M5.BtnB.wasReleased()) {
-    pendingButtonB_ = false;
-    router_.dispatch({SequencerInputEventType::ButtonB}, 0);
+  if (M5.BtnB.wasReleased()) {
+    if (buttonB_.releaseAsTap()) {
+      router_.dispatch({SequencerInputEventType::ButtonB}, 0);
+    }
   }
 }
 
@@ -48,10 +50,10 @@ void SequencerInput::update(uint64_t nowUs) {
   uint8_t value = 0;
   if (readCalculatorByte(value)) {
     SequencerInputEvent event{SequencerInputEventType::CalculatorValue, value};
-    event.modifierA = pendingButtonA_ && M5.BtnA.isPressed();
-    event.modifierB = pendingButtonB_ && M5.BtnB.isPressed();
-    if (event.modifierA) pendingButtonA_ = false;
-    if (event.modifierB) pendingButtonB_ = false;
+    event.modifierA = buttonA_.modifierActive(M5.BtnA.isPressed());
+    event.modifierB = buttonB_.modifierActive(M5.BtnB.isPressed());
+    if (event.modifierA) buttonA_.consumeAsModifier();
+    if (event.modifierB) buttonB_.consumeAsModifier();
     router_.dispatch(event, nowUs);
   } else {
     Serial.println("calculator: read_error");

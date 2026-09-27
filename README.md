@@ -45,7 +45,10 @@ AC   M    %    /       select tracks 1–4
 .    0   +/-   =       steps 13–16
 ```
 
-Press a track key to select it. Press a step key to toggle that cell.
+Press a track key to select it. Press a step key to toggle that cell. Hold Core
+button **A** while pressing one or more step keys to assign weak hits, or hold
+Core button **B** to assign strong hits. Modified presses replace the existing
+level instead of toggling the step off.
 
 ### Core buttons
 
@@ -63,9 +66,9 @@ Press a track key to select it. Press a step key to toggle that cell.
   The **=** cell clears all steps from the currently selected next pattern,
   while preserving its sound choices.
 
-These are press toggles rather than hold modifiers, so the Calculator can be
-played with the other hand. Chords are not required by the current interface.
-Pattern changes are applied at the end of the current sixteen-step cycle.
+Short A and B taps remain screen toggles; their screen action is suppressed
+when the button is used as a step modifier. Pattern changes are applied at the
+end of the current sixteen-step cycle.
 
 The display shows the active mode and the relevant Calculator key legend so
 the instrument remains discoverable without a separate controller.
