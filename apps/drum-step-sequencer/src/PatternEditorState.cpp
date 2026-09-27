@@ -6,6 +6,10 @@ bool PatternEditorState::stepActive(uint8_t track, uint8_t step) const {
   return patterns_.stepActive(currentPattern_, track, step);
 }
 
+StepLevel PatternEditorState::stepLevel(uint8_t track, uint8_t step) const {
+  return patterns_.stepLevel(currentPattern_, track, step);
+}
+
 bool PatternEditorState::patternEmpty(uint8_t pattern) const {
   return patterns_.patternEmpty(pattern);
 }

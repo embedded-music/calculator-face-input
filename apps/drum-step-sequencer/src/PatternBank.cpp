@@ -14,8 +14,16 @@ PatternBank::PatternBank() {
 
 bool PatternBank::stepActive(uint8_t pattern, uint8_t track,
                              uint8_t step) const {
-  return pattern < PATTERN_SLOT_COUNT && track < TRACK_COUNT &&
-         step < STEP_COUNT && patterns_[pattern].steps[track][step];
+  return stepLevel(pattern, track, step) != StepLevel::Off;
+}
+
+StepLevel PatternBank::stepLevel(uint8_t pattern, uint8_t track,
+                                 uint8_t step) const {
+  if (pattern >= PATTERN_SLOT_COUNT || track >= TRACK_COUNT ||
+      step >= STEP_COUNT) {
+    return StepLevel::Off;
+  }
+  return patterns_[pattern].steps[track][step];
 }
 
 bool PatternBank::toggleStep(uint8_t pattern, uint8_t track, uint8_t step) {
@@ -23,16 +31,16 @@ bool PatternBank::toggleStep(uint8_t pattern, uint8_t track, uint8_t step) {
       step >= STEP_COUNT) {
     return false;
   }
-  bool& active = patterns_[pattern].steps[track][step];
-  active = !active;
-  return active;
+  StepLevel& level = patterns_[pattern].steps[track][step];
+  level = level == StepLevel::Off ? StepLevel::Normal : StepLevel::Off;
+  return level != StepLevel::Off;
 }
 
 bool PatternBank::patternEmpty(uint8_t pattern) const {
   if (pattern >= PATTERN_SLOT_COUNT) return true;
   for (uint8_t track = 0; track < TRACK_COUNT; track++) {
     for (uint8_t step = 0; step < STEP_COUNT; step++) {
-      if (patterns_[pattern].steps[track][step]) return false;
+      if (patterns_[pattern].steps[track][step] != StepLevel::Off) return false;
     }
   }
   return true;
@@ -66,7 +74,7 @@ void PatternBank::clear(uint8_t pattern) {
   if (pattern >= PATTERN_SLOT_COUNT) return;
   for (uint8_t track = 0; track < TRACK_COUNT; track++) {
     for (uint8_t step = 0; step < STEP_COUNT; step++) {
-      patterns_[pattern].steps[track][step] = false;
+      patterns_[pattern].steps[track][step] = StepLevel::Off;
     }
   }
 }

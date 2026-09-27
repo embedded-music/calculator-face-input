@@ -21,6 +21,7 @@ class FakeEventSink final : public SequencerEventSink {
   uint8_t wakeCount = 0;
   uint8_t noteCount = 0;
   uint8_t lastSoundId = 0;
+  StepLevel lastLevel = StepLevel::Off;
   uint32_t lastTailMs = 0;
 
   void wake(uint32_t tailMs) override {
@@ -30,6 +31,7 @@ class FakeEventSink final : public SequencerEventSink {
   void trigger(const SequencerEvent& event) override {
     noteCount++;
     lastSoundId = event.soundId;
+    lastLevel = event.level;
   }
 };
 #include "../../apps/drum-step-sequencer/src/PatternEditorState.cpp"
@@ -187,6 +189,8 @@ void test_playback_with_fake_clock_and_event_sink() {
   TEST_ASSERT_EQUAL_UINT8(1, sink.noteCount);
   TEST_ASSERT_EQUAL_UINT8(1, sink.wakeCount);
   TEST_ASSERT_EQUAL_UINT8(state.soundForTrack(0).midiNote, sink.lastSoundId);
+  TEST_ASSERT_EQUAL_UINT8(static_cast<uint8_t>(StepLevel::Normal),
+                          static_cast<uint8_t>(sink.lastLevel));
   TEST_ASSERT_EQUAL_UINT32(1500, sink.lastTailMs);
 
   clock.nextElapsedSteps = 3;

@@ -3,6 +3,7 @@
 #include <stdint.h>
 
 #include "DrumSounds.h"
+#include "StepLevel.h"
 
 constexpr uint8_t TRACK_COUNT = 4;
 constexpr uint8_t STEP_COUNT = 16;
@@ -13,6 +14,7 @@ class PatternBank {
   PatternBank();
 
   bool stepActive(uint8_t pattern, uint8_t track, uint8_t step) const;
+  StepLevel stepLevel(uint8_t pattern, uint8_t track, uint8_t step) const;
   bool toggleStep(uint8_t pattern, uint8_t track, uint8_t step);
   bool patternEmpty(uint8_t pattern) const;
   uint8_t soundIndex(uint8_t pattern, uint8_t track) const;
@@ -23,7 +25,7 @@ class PatternBank {
 
  private:
   struct PatternData {
-    bool steps[TRACK_COUNT][STEP_COUNT]{};
+    StepLevel steps[TRACK_COUNT][STEP_COUNT]{};
     uint8_t soundIndices[TRACK_COUNT]{};
   };
 

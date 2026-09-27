@@ -12,7 +12,9 @@ constexpr uint16_t COLOR_BACKGROUND = TFT_BLACK;
 constexpr uint16_t COLOR_HEADER = 0x18C3;
 constexpr uint16_t COLOR_GRID = 0x4208;
 constexpr uint16_t COLOR_STEP_OFF = 0x2104;
-constexpr uint16_t COLOR_STEP_ON = TFT_CYAN;
+constexpr uint16_t COLOR_STEP_WEAK = 0x03EF;
+constexpr uint16_t COLOR_STEP_NORMAL = 0x05FF;
+constexpr uint16_t COLOR_STEP_STRONG = TFT_CYAN;
 constexpr uint16_t COLOR_STEP_PENDING = 0x03EF;
 constexpr uint16_t COLOR_SELECTED = TFT_YELLOW;
 constexpr uint16_t COLOR_SELECTED_MUTED = 0x7BE0;
@@ -50,8 +52,14 @@ void PatternEditorView::drawStep(const PatternEditorState& state,
   const int16_t y = GRID_TOP + track * rowHeight();
   const uint16_t border = track == state.selectedTrack() ? COLOR_SELECTED
                                                          : COLOR_GRID;
-  const uint16_t fill = state.stepActive(track, step) ? COLOR_STEP_ON
-                                                       : COLOR_STEP_OFF;
+  const StepLevel level = state.stepLevel(track, step);
+  const uint16_t fill = level == StepLevel::Weak
+                            ? COLOR_STEP_WEAK
+                            : level == StepLevel::Strong
+                                  ? COLOR_STEP_STRONG
+                                  : level == StepLevel::Normal
+                                        ? COLOR_STEP_NORMAL
+                                        : COLOR_STEP_OFF;
   display_.fillRect(x + 2, y + 5, cellWidth() - 4, rowHeight() - 10, fill);
   display_.drawRect(x + 1, y + 4, cellWidth() - 2, rowHeight() - 8, border);
   if (step == state.currentStep()) drawPlayheadIndicator(state, track, step, true);
@@ -62,8 +70,14 @@ void PatternEditorView::drawPlayheadIndicator(const PatternEditorState& state,
                                                bool visible) {
   const int16_t x = LABEL_WIDTH + step * cellWidth();
   const int16_t y = GRID_TOP + track * rowHeight();
-  const uint16_t fill = state.stepActive(track, step) ? COLOR_STEP_ON
-                                                       : COLOR_STEP_OFF;
+  const StepLevel level = state.stepLevel(track, step);
+  const uint16_t fill = level == StepLevel::Weak
+                            ? COLOR_STEP_WEAK
+                            : level == StepLevel::Strong
+                                  ? COLOR_STEP_STRONG
+                                  : level == StepLevel::Normal
+                                        ? COLOR_STEP_NORMAL
+                                        : COLOR_STEP_OFF;
   display_.fillRect(x + 3, y + rowHeight() - 8, cellWidth() - 6, 3,
                     visible ? COLOR_PLAYHEAD : fill);
 }

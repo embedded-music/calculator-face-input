@@ -38,6 +38,7 @@ class PatternEditorState {
   }
   const DrumSound& soundForTrack(uint8_t track) const;
   bool stepActive(uint8_t track, uint8_t step) const;
+  StepLevel stepLevel(uint8_t track, uint8_t step) const;
   bool patternEmpty(uint8_t pattern) const;
   void selectTrack(uint8_t track);
   bool toggleStep(uint8_t step);

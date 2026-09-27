@@ -7,10 +7,11 @@ constexpr uint32_t DRUM_TAIL_MS = 1500;
 void SequencerPlayback::triggerCurrentStep() {
   bool hasTrigger = false;
   for (uint8_t track = 0; track < TRACK_COUNT; track++) {
-    if (editor_.stepActive(track, editor_.currentStep())) {
+    const StepLevel level = editor_.stepLevel(track, editor_.currentStep());
+    if (level != StepLevel::Off) {
       if (!hasTrigger) eventSink_.wake(DRUM_TAIL_MS);
       eventSink_.trigger(
-          SequencerEvent{editor_.soundForTrack(track).midiNote});
+          SequencerEvent{editor_.soundForTrack(track).midiNote, level});
       hasTrigger = true;
     }
   }
