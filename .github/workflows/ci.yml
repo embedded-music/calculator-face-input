@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  step-trigger:
+    name: step-trigger package and Calculator consumer
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Cache PlatformIO packages
+        uses: actions/cache@v5
+        with:
+          path: .platformio-home
+          key: platformio-step-trigger-${{ runner.os }}-${{ hashFiles('packages/step-trigger/**', 'ci/consumers/step-trigger/**', 'platformio.ini', 'apps/drum-step-sequencer/src/**', 'test/**') }}
+          restore-keys: |
+            platformio-step-trigger-${{ runner.os }}-
+
+      - name: Install PlatformIO
+        run: python -m pip install platformio==6.2.0
+
+      - name: Run package native tests
+        run: env PLATFORMIO_CORE_DIR=.platformio-home pio test -d packages/step-trigger -e native
+
+      - name: Run Calculator native tests
+        run: env PLATFORMIO_CORE_DIR=.platformio-home pio test -e native
+
+      - name: Pack package
+        run: env PLATFORMIO_CORE_DIR=.platformio-home pio pkg pack packages/step-trigger --output /tmp
+
+      - name: Build archive consumer
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(python -c 'import json; print(json.load(open("packages/step-trigger/library.json", encoding="utf-8"))["version"])')"
+          archive="/tmp/step-trigger-${version}.tar.gz"
+          test -f "$archive"
+          STEP_TRIGGER_PACKAGE="file://$archive" pio run -d ci/consumers/step-trigger
+
+      - name: Build Calculator firmware
+        run: env PLATFORMIO_CORE_DIR=.platformio-home pio run -e drum-step-sequencer

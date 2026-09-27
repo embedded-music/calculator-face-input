@@ -109,3 +109,10 @@ passed and linked `step-trigger@0.1.0` as a local PlatformIO dependency.
 No intended hardware behavior changed in this extraction. The next umbrella
 showcase can use shorter preset cycles and route the same neutral lane events
 to its own AMY sound assignments.
+
+## Hardware observation
+
+The extracted package passed a Calculator hardware regression. Pattern
+editing, playback, and the existing instrument behavior remained usable on the
+Core Gray after the internal pattern and trigger path moved through
+`step-trigger`.

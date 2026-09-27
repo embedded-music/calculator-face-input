@@ -26,3 +26,10 @@ pattern.setStepLevel(1, 3, StepLevel::Normal);
 The fixed 32-position capacity covers common four-beat grids including 12
 eighth-note triplets, 16 sixteenth notes, and 24 sixteenth-note triplets while
 remaining allocation-free.
+
+Run the package tests and create a registry-compatible archive with:
+
+```text
+pio test -e native
+pio pkg pack --output /tmp
+```
