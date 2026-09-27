@@ -16,6 +16,5 @@ struct SequencerEvent {
 class SequencerEventSink {
  public:
   virtual ~SequencerEventSink() = default;
-  virtual void wake(uint32_t tailMs) = 0;
   virtual void trigger(const SequencerEvent& event) = 0;
 };

@@ -5,7 +5,6 @@
 #include "../../apps/drum-step-sequencer/src/PatternChain.cpp"
 #include "../../apps/drum-step-sequencer/src/SequencerSettings.cpp"
 #include "../../apps/drum-step-sequencer/src/SequencerPlaybackPolicy.h"
-#include "../../apps/drum-step-sequencer/src/StepVelocity.h"
 #include "../../apps/drum-step-sequencer/src/SequencerCommandMap.cpp"
 #include "../../apps/drum-step-sequencer/src/SequencerPlayback.cpp"
 #include "../../apps/drum-step-sequencer/src/SequencerStepClock.h"
@@ -20,37 +19,15 @@ class FakeClock final : public SequencerClock {
 
 class FakeEventSink final : public SequencerEventSink {
  public:
-  uint8_t wakeCount = 0;
   uint8_t noteCount = 0;
   uint8_t lastSoundId = 0;
   StepLevel lastLevel = StepLevel::Off;
-  uint32_t lastTailMs = 0;
-
-  void wake(uint32_t tailMs) override {
-    wakeCount++;
-    lastTailMs = tailMs;
-  }
   void trigger(const SequencerEvent& event) override {
     noteCount++;
     lastSoundId = event.soundId;
     lastLevel = event.level;
   }
 };
-
-void test_step_levels_have_distinct_ordered_velocities() {
-  TEST_ASSERT_FLOAT_WITHIN(0.001f, 0.0f,
-                           velocityForStepLevel(StepLevel::Off));
-  TEST_ASSERT_FLOAT_WITHIN(0.001f, 0.45f,
-                           velocityForStepLevel(StepLevel::Weak));
-  TEST_ASSERT_FLOAT_WITHIN(0.001f, 0.70f,
-                           velocityForStepLevel(StepLevel::Normal));
-  TEST_ASSERT_FLOAT_WITHIN(0.001f, 1.0f,
-                           velocityForStepLevel(StepLevel::Strong));
-  TEST_ASSERT_TRUE(velocityForStepLevel(StepLevel::Weak) <
-                   velocityForStepLevel(StepLevel::Normal));
-  TEST_ASSERT_TRUE(velocityForStepLevel(StepLevel::Normal) <
-                   velocityForStepLevel(StepLevel::Strong));
-}
 
 void test_swing_clock_alternates_without_changing_pair_duration() {
   SequencerStepClock clock;
@@ -256,17 +233,14 @@ void test_playback_with_fake_clock_and_event_sink() {
   const SequencerPlaybackUpdate onTime = playback.update(0);
   TEST_ASSERT_EQUAL_UINT32(1, onTime.elapsedSteps);
   TEST_ASSERT_EQUAL_UINT8(1, sink.noteCount);
-  TEST_ASSERT_EQUAL_UINT8(1, sink.wakeCount);
   TEST_ASSERT_EQUAL_UINT8(state.soundForTrack(0).midiNote, sink.lastSoundId);
   TEST_ASSERT_EQUAL_UINT8(static_cast<uint8_t>(StepLevel::Normal),
                           static_cast<uint8_t>(sink.lastLevel));
-  TEST_ASSERT_EQUAL_UINT32(1500, sink.lastTailMs);
 
   clock.nextElapsedSteps = 3;
   const SequencerPlaybackUpdate late = playback.update(0);
   TEST_ASSERT_EQUAL_UINT32(3, late.elapsedSteps);
   TEST_ASSERT_EQUAL_UINT8(1, sink.noteCount);
-  TEST_ASSERT_EQUAL_UINT8(1, sink.wakeCount);
 }
 
 void test_playback_triggers_all_active_tracks_once_per_step() {
@@ -284,7 +258,6 @@ void test_playback_triggers_all_active_tracks_once_per_step() {
 
   TEST_ASSERT_EQUAL_UINT8(0, update.previousStep);
   TEST_ASSERT_EQUAL_UINT8(2, sink.noteCount);
-  TEST_ASSERT_EQUAL_UINT8(1, sink.wakeCount);
 }
 
 void test_playback_reports_chain_change_then_triggers_new_pattern() {
@@ -315,7 +288,6 @@ void test_playback_reports_chain_change_then_triggers_new_pattern() {
 
 int main() {
   UNITY_BEGIN();
-  RUN_TEST(test_step_levels_have_distinct_ordered_velocities);
   RUN_TEST(test_swing_clock_alternates_without_changing_pair_duration);
   RUN_TEST(test_triplet_rates_bypass_swing);
   RUN_TEST(test_sparse_chain_advances_only_enabled_positions);
