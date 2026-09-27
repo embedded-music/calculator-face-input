@@ -3,9 +3,9 @@
 #include <stdint.h>
 
 #include "DrumSounds.h"
-#include "StepLevel.h"
+#include "TriggerPattern.h"
 
-constexpr uint8_t TRACK_COUNT = 4;
+constexpr uint8_t TRACK_COUNT = TriggerPattern::LANE_COUNT;
 constexpr uint8_t STEP_COUNT = 16;
 constexpr uint8_t PATTERN_SLOT_COUNT = 4;
 
@@ -24,10 +24,11 @@ class PatternBank {
   void selectSound(uint8_t pattern, uint8_t track, uint8_t soundIndex);
   void clone(uint8_t sourcePattern, uint8_t targetPattern);
   void clear(uint8_t pattern);
+  const TriggerPattern& triggerPattern(uint8_t pattern) const;
 
  private:
   struct PatternData {
-    StepLevel steps[TRACK_COUNT][STEP_COUNT]{};
+    TriggerPattern triggers;
     uint8_t soundIndices[TRACK_COUNT]{};
   };
 

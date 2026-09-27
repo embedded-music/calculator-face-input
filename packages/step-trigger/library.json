@@ -1,0 +1,20 @@
+{
+  "$schema": "https://raw.githubusercontent.com/platformio/platformio-core/develop/platformio/assets/schema/library.json",
+  "name": "step-trigger",
+  "version": "0.1.0",
+  "description": "Fixed-capacity step-trigger patterns for embedded music",
+  "keywords": ["music", "sequencer", "trigger", "pattern", "embedded"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/embedded-music/calculator-face-input.git"
+  },
+  "frameworks": "*",
+  "platforms": "*",
+  "headers": [
+    "StepLevel.h",
+    "TriggerEvent.h",
+    "TriggerEventSink.h",
+    "TriggerPattern.h",
+    "TriggerPatternPlayer.h"
+  ]
+}

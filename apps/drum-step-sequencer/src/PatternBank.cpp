@@ -6,6 +6,7 @@ constexpr uint8_t DEFAULT_SOUND_INDICES[TRACK_COUNT] = {0, 4, 10, 18};
 
 PatternBank::PatternBank() {
   for (uint8_t pattern = 0; pattern < PATTERN_SLOT_COUNT; pattern++) {
+    patterns_[pattern].triggers.setLength(STEP_COUNT);
     for (uint8_t track = 0; track < TRACK_COUNT; track++) {
       patterns_[pattern].soundIndices[track] = DEFAULT_SOUND_INDICES[track];
     }
@@ -14,7 +15,8 @@ PatternBank::PatternBank() {
 
 bool PatternBank::stepActive(uint8_t pattern, uint8_t track,
                              uint8_t step) const {
-  return stepLevel(pattern, track, step) != StepLevel::Off;
+  if (pattern >= PATTERN_SLOT_COUNT) return false;
+  return patterns_[pattern].triggers.stepActive(track, step);
 }
 
 StepLevel PatternBank::stepLevel(uint8_t pattern, uint8_t track,
@@ -23,37 +25,23 @@ StepLevel PatternBank::stepLevel(uint8_t pattern, uint8_t track,
       step >= STEP_COUNT) {
     return StepLevel::Off;
   }
-  return patterns_[pattern].steps[track][step];
+  return patterns_[pattern].triggers.stepLevel(track, step);
 }
 
 bool PatternBank::toggleStep(uint8_t pattern, uint8_t track, uint8_t step) {
-  if (pattern >= PATTERN_SLOT_COUNT || track >= TRACK_COUNT ||
-      step >= STEP_COUNT) {
-    return false;
-  }
-  StepLevel& level = patterns_[pattern].steps[track][step];
-  level = level == StepLevel::Off ? StepLevel::Normal : StepLevel::Off;
-  return level != StepLevel::Off;
+  if (pattern >= PATTERN_SLOT_COUNT) return false;
+  return patterns_[pattern].triggers.toggleStep(track, step);
 }
 
 bool PatternBank::setStepLevel(uint8_t pattern, uint8_t track, uint8_t step,
                                StepLevel level) {
-  if (pattern >= PATTERN_SLOT_COUNT || track >= TRACK_COUNT ||
-      step >= STEP_COUNT) {
-    return false;
-  }
-  patterns_[pattern].steps[track][step] = level;
-  return level != StepLevel::Off;
+  if (pattern >= PATTERN_SLOT_COUNT) return false;
+  return patterns_[pattern].triggers.setStepLevel(track, step, level);
 }
 
 bool PatternBank::patternEmpty(uint8_t pattern) const {
   if (pattern >= PATTERN_SLOT_COUNT) return true;
-  for (uint8_t track = 0; track < TRACK_COUNT; track++) {
-    for (uint8_t step = 0; step < STEP_COUNT; step++) {
-      if (patterns_[pattern].steps[track][step] != StepLevel::Off) return false;
-    }
-  }
-  return true;
+  return patterns_[pattern].triggers.empty();
 }
 
 uint8_t PatternBank::soundIndex(uint8_t pattern, uint8_t track) const {
@@ -82,9 +70,9 @@ void PatternBank::clone(uint8_t sourcePattern, uint8_t targetPattern) {
 
 void PatternBank::clear(uint8_t pattern) {
   if (pattern >= PATTERN_SLOT_COUNT) return;
-  for (uint8_t track = 0; track < TRACK_COUNT; track++) {
-    for (uint8_t step = 0; step < STEP_COUNT; step++) {
-      patterns_[pattern].steps[track][step] = StepLevel::Off;
-    }
-  }
+  patterns_[pattern].triggers.clear();
+}
+
+const TriggerPattern& PatternBank::triggerPattern(uint8_t pattern) const {
+  return patterns_[pattern < PATTERN_SLOT_COUNT ? pattern : 0].triggers;
 }

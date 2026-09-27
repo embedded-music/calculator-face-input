@@ -39,6 +39,9 @@ class PatternEditorState {
     return DRUM_SOUNDS[selectedSoundIndex()];
   }
   const DrumSound& soundForTrack(uint8_t track) const;
+  const TriggerPattern& currentTriggerPattern() const {
+    return patterns_.triggerPattern(currentPattern_);
+  }
   bool stepActive(uint8_t track, uint8_t step) const;
   StepLevel stepLevel(uint8_t track, uint8_t step) const;
   bool patternEmpty(uint8_t pattern) const;
