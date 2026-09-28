@@ -6,7 +6,7 @@
   "keywords": ["music", "sequencer", "trigger", "pattern", "embedded"],
   "repository": {
     "type": "git",
-    "url": "https://github.com/embedded-music/calculator-face-input.git"
+    "url": "https://github.com/embedded-music/pattern256.git"
   },
   "frameworks": "*",
   "platforms": "*",

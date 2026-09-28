@@ -1,12 +1,21 @@
-# Calculator Face Drum Sequencer
+# Pattern 256
 
-An experimental four-track, sixteen-step drum instrument for the original
-M5Stack Faces Calculator and M5Stack Core Gray.
+Pattern 256 is a compact drum sequencer for M5Stack devices. The current
+edition turns the original M5Stack Faces Calculator and M5Stack Core Gray into
+a four-track, sixteen-step instrument; a Cardputer ADV edition is planned.
 
-This repository is where the instrument grew from a Calculator input probe
-into a playable hardware demo. It contains the firmware, the interaction
-experiments, and the devlogs that record the discoveries behind it. It is not
-yet a reusable sequencer library or a finished product.
+The name describes the product's 16-step pattern and 16-position arrangement
+target. The current Calculator edition exposes twelve chain positions, for a
+maximum 192-step arrangement. Reaching the full 256-step target is future
+product work rather than a claim about the present firmware.
+
+This repository began as a Calculator input probe and records the instrument's
+growth into a playable hardware experiment. It contains the firmware, shared
+sequencing packages, and narrative devlogs behind Pattern 256.
+
+Pattern 256 is an [Embedded Music][embedded-music] project. The firmware is
+developed in the open; a future product site may package polished releases,
+manuals, media, and supported downloads separately.
 
 ## What it does
 
@@ -31,6 +40,21 @@ values change.
 
 The Calculator is connected through the Core Gray's I2C face connector. The
 firmware uses the Core Gray display, buttons, and internal speaker.
+
+## Editions and architecture
+
+The Calculator edition is the reference implementation and immediate polish
+target. The planned Cardputer ADV edition will share musical behavior and
+fixed-size pattern data while owning its keyboard mapping, screen layout, and
+hardware integration. Device interfaces should fit their controls rather than
+imitate one another.
+
+The repository currently keeps the shipping firmware and its supporting
+packages together. Future reorganization should preserve three boundaries:
+
+- shared sequencing code owns musical data and deterministic playback;
+- an edition owns input mapping and presentation;
+- an audio backend owns hardware sound output.
 
 ## Controls
 
@@ -133,13 +157,13 @@ The narrative history lives in [`docs/devlog/`](docs/devlog/). Start with:
 - [`026-missed-step-policy.md`](docs/devlog/026-missed-step-policy.md)
   — late-poll and stale-audio behavior.
 
-Each feature is developed as a small hardware-testable slice. Shared code is
-extracted only after real consumers reveal a stable contract. A future product
-repository may eventually grow from this experiment, but this repository
-remains the laboratory and historical record for now.
+Each feature is developed as a small hardware-testable slice. Historical
+chapters retain their original Calculator-oriented terminology; new chapters
+use the Pattern 256 product name and identify edition-specific decisions.
 
 [amy]: https://github.com/shorepine/amy
 [amy-synth-m5]: https://github.com/fczuardi/amy-synth-m5
+[embedded-music]: https://github.com/embedded-music
 [late-poll]: docs/devlog/026-missed-step-policy.md
 [musical-clock]: https://github.com/embedded-music/musical-clock
 [pioarduino]: https://github.com/pioarduino/platform-espressif32

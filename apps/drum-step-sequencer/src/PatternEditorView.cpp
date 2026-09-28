@@ -40,7 +40,7 @@ void PatternEditorView::drawHeader(const PatternEditorState& state) {
   display_.setTextSize(2);
   display_.setTextColor(COLOR_TEXT, COLOR_HEADER);
   display_.setCursor(8, 8);
-  display_.print("DRUM STEPS");
+  display_.print("PATTERN 256");
   display_.setTextSize(1);
   display_.setCursor(display_.width() - 72, 12);
   display_.printf("PATTERN %s", PATTERN_KEYS[state.currentPattern()]);

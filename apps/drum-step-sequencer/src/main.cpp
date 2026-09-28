@@ -54,7 +54,7 @@ void setup() {
       static_cast<uint64_t>(esp_timer_get_time()), editor.stepIntervalUs(),
       editor.swingPercent(), editor.swingActive());
   if (!clockStarted) Serial.println("clock: begin_failed");
-  Serial.printf("drum_step_sequencer: calculator_detected=%s\n",
+  Serial.printf("pattern256: edition=calculator calculator_detected=%s\n",
                 calculatorAcknowledges() ? "yes" : "no");
 }
 
