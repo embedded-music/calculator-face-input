@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/platformio/platformio-core/develop/platformio/assets/schema/library.json",
   "name": "step-trigger",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Fixed-capacity step-trigger patterns for embedded music",
   "keywords": ["music", "sequencer", "trigger", "pattern", "embedded"],
   "repository": {
@@ -15,6 +15,13 @@
     "TriggerEvent.h",
     "TriggerEventSink.h",
     "TriggerPattern.h",
-    "TriggerPatternPlayer.h"
+    "TriggerPatternCell.h",
+    "TriggerPatternLoader.h",
+    "TriggerPatternEmitter.h",
+    "TriggerPatternPlayer.h",
+    "TriggerPatternCursor.h"
+  ],
+  "dependencies": [
+    {"owner": "fcz2", "name": "musical-clock", "version": ">=0.2.0"}
   ]
 }

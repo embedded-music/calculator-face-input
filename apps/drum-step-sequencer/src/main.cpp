@@ -69,7 +69,7 @@ void loop() {
       Serial.printf("pattern: switched current=%u next=%u\n",
                     editor.currentPattern() + 1, editor.nextPattern() + 1);
     } else if (!update.patternChanged && update.elapsedSteps > 1) {
-      Serial.printf("transport: skipped_steps count=%lu\n",
+      Serial.printf("playback: skipped_steps count=%lu\n",
                     static_cast<unsigned long>(update.elapsedSteps));
     }
     if (input.mode() == UiMode::Pattern) {

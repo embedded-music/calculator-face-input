@@ -34,21 +34,19 @@ bool PatternEditorState::setStepLevel(uint8_t step, StepLevel level) {
   return patterns_.setStepLevel(currentPattern_, selectedTrack_, step, level);
 }
 
-bool PatternEditorState::advanceByElapsedSteps(uint32_t elapsedSteps) {
+TriggerPatternCursorUpdate PatternEditorState::advanceByElapsedSteps(
+    uint32_t elapsedSteps) {
   patternChangedAtBoundary_ = false;
-  if (elapsedSteps == 0) return false;
-  const bool crossedBoundary =
-      elapsedSteps >= STEP_COUNT || currentStep_ + elapsedSteps >= STEP_COUNT;
-  currentStep_ = static_cast<uint8_t>(
-      (currentStep_ + (elapsedSteps % STEP_COUNT)) % STEP_COUNT);
-  if (crossedBoundary) {
+  const TriggerPatternCursorUpdate update =
+      cursor_.advance(elapsedSteps, STEP_COUNT);
+  if (update.crossedCycle()) {
     chain_.advance();
     const uint8_t nextCurrentPattern = chain_.currentPattern();
     patternChangedAtBoundary_ = currentPattern_ != nextCurrentPattern;
     currentPattern_ = nextCurrentPattern;
     nextPattern_ = chain_.nextPattern();
   }
-  return crossedBoundary;
+  return update;
 }
 
 void PatternEditorState::selectNextPattern(uint8_t pattern) {

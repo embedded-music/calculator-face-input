@@ -22,10 +22,12 @@ class SequencerPlaybackPolicy {
     decision.elapsedSteps = elapsedSteps;
     if (elapsedSteps == 0) return decision;
 
-    decision.previousStep = editor.currentStep();
-    decision.patternBoundary = editor.advanceByElapsedSteps(elapsedSteps);
+    const TriggerPatternCursorUpdate cursor =
+        editor.advanceByElapsedSteps(elapsedSteps);
+    decision.previousStep = cursor.previousStep;
+    decision.patternBoundary = cursor.crossedCycle();
     decision.patternChanged = editor.patternChangedAtBoundary();
-    decision.triggerCurrentStep = elapsedSteps == 1;
+    decision.triggerCurrentStep = cursor.shouldEmit();
     return decision;
   }
 };

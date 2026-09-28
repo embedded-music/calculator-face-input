@@ -1,7 +1,5 @@
 #include "SequencerPlayback.h"
 
-#include "TriggerPatternPlayer.h"
-
 class CalculatorTriggerRouter final : public TriggerEventSink {
  public:
   CalculatorTriggerRouter(PatternEditorState& editor,
@@ -20,8 +18,7 @@ class CalculatorTriggerRouter final : public TriggerEventSink {
 
 void SequencerPlayback::triggerCurrentStep() {
   CalculatorTriggerRouter router(editor_, eventSink_);
-  TriggerPatternPlayer::emitStep(editor_.currentTriggerPattern(),
-                                 editor_.currentStep(), router);
+  editor_.emitCurrentStep(router);
 }
 
 SequencerPlaybackUpdate SequencerPlayback::update(uint64_t nowUs) {

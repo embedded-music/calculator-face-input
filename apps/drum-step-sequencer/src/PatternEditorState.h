@@ -6,12 +6,13 @@
 #include "PatternBank.h"
 #include "PatternChain.h"
 #include "SequencerSettings.h"
+#include "TriggerPatternCursor.h"
 
 class PatternEditorState {
  public:
   PatternEditorState();
   uint8_t selectedTrack() const { return selectedTrack_; }
-  uint8_t currentStep() const { return currentStep_; }
+  uint8_t currentStep() const { return cursor_.currentStep(); }
   uint8_t currentPattern() const { return currentPattern_; }
   uint8_t nextPattern() const { return nextPattern_; }
   bool cloneMode() const { return cloneMode_; }
@@ -42,6 +43,9 @@ class PatternEditorState {
   const TriggerPattern& currentTriggerPattern() const {
     return patterns_.triggerPattern(currentPattern_);
   }
+  uint8_t emitCurrentStep(TriggerEventSink& sink) const {
+    return cursor_.emitCurrentStep(currentTriggerPattern(), sink);
+  }
   bool stepActive(uint8_t track, uint8_t step) const;
   StepLevel stepLevel(uint8_t track, uint8_t step) const;
   bool patternEmpty(uint8_t pattern) const;
@@ -52,7 +56,7 @@ class PatternEditorState {
   // Missed steps are intentionally not replayed as audio bursts.
   // Returns true when crossing the 16-step boundary. The current pattern may
   // stay the same while the chain position advances.
-  bool advanceByElapsedSteps(uint32_t elapsedSteps);
+  TriggerPatternCursorUpdate advanceByElapsedSteps(uint32_t elapsedSteps);
   bool patternChangedAtBoundary() const { return patternChangedAtBoundary_; }
   void selectNextPattern(uint8_t pattern);
   void cloneCurrentPatternTo(uint8_t pattern);
@@ -72,7 +76,7 @@ class PatternEditorState {
  private:
   PatternBank patterns_;
   uint8_t selectedTrack_ = TRACK_COUNT - 1;
-  uint8_t currentStep_ = 0;
+  TriggerPatternCursor cursor_;
   uint8_t currentPattern_ = 0;
   uint8_t nextPattern_ = 0;
   PatternChain chain_;

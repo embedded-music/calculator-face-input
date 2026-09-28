@@ -62,18 +62,18 @@ void test_sparse_chain_advances_only_enabled_positions() {
   TEST_ASSERT_EQUAL_UINT8(2, state.chainLength());
   TEST_ASSERT_EQUAL_UINT8(10, state.nextChainPosition());
 
-  TEST_ASSERT_TRUE(state.advanceByElapsedSteps(STEP_COUNT));
+  TEST_ASSERT_TRUE(state.advanceByElapsedSteps(STEP_COUNT).crossedCycle());
   TEST_ASSERT_EQUAL_UINT8(10, state.chainPosition());
   TEST_ASSERT_EQUAL_UINT8(0, state.nextChainPosition());
 
-  TEST_ASSERT_TRUE(state.advanceByElapsedSteps(STEP_COUNT));
+  TEST_ASSERT_TRUE(state.advanceByElapsedSteps(STEP_COUNT).crossedCycle());
   TEST_ASSERT_EQUAL_UINT8(0, state.chainPosition());
 }
 
 void test_current_chain_position_removal_is_quantized() {
   PatternEditorState state;
   TEST_ASSERT_TRUE(state.toggleChainPosition(10));
-  TEST_ASSERT_TRUE(state.advanceByElapsedSteps(STEP_COUNT));
+  TEST_ASSERT_TRUE(state.advanceByElapsedSteps(STEP_COUNT).crossedCycle());
   TEST_ASSERT_EQUAL_UINT8(10, state.chainPosition());
 
   TEST_ASSERT_TRUE(state.toggleChainPosition(10));
@@ -81,7 +81,7 @@ void test_current_chain_position_removal_is_quantized() {
   TEST_ASSERT_EQUAL_UINT8(10, state.chainPosition());
   TEST_ASSERT_TRUE(state.chainPositionVisible(10));
 
-  TEST_ASSERT_TRUE(state.advanceByElapsedSteps(STEP_COUNT));
+  TEST_ASSERT_TRUE(state.advanceByElapsedSteps(STEP_COUNT).crossedCycle());
   TEST_ASSERT_EQUAL_UINT8(0, state.chainPosition());
   TEST_ASSERT_FALSE(state.chainPositionEnabled(10));
 }
