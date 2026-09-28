@@ -124,6 +124,19 @@ just build-probe
 just upload-probe
 ```
 
+## M5Burner package
+
+Build a versioned, merged image suitable for M5Burner's custom firmware and
+publishing flow with:
+
+```sh
+just package-m5burner
+```
+
+The ignored output is written under `dist/m5burner/`. See the
+[M5Burner publishing guide](docs/publishing/m5burner.md) for binary layout,
+hardware validation, and submission fields.
+
 ## Timing and dependencies
 
 The app converts BPM and the selected musical rate into a step duration, then

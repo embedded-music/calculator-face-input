@@ -14,6 +14,9 @@ upload-probe:
 build-sequencer:
     {{pio}} run -e drum-step-sequencer
 
+package-m5burner:
+    tools/package-m5burner.sh
+
 test-native:
     {{pio}} test -e native
 

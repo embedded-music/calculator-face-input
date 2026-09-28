@@ -4,3 +4,4 @@
 .env
 .platformio-home/
 .vscode/
+dist/
