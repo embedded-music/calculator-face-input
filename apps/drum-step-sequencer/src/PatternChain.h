@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 constexpr uint8_t CHAIN_MIN_LENGTH = 1;
-constexpr uint8_t CHAIN_MAX_LENGTH = 12;
+constexpr uint8_t CHAIN_MAX_LENGTH = 16;
 
 class PatternChain {
  public:

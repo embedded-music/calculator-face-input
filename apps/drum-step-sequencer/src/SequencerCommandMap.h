@@ -15,8 +15,6 @@ enum class SequencerAction : uint8_t {
   SwingDown,
   SwingUp,
   SelectSound,
-  ToggleClone,
-  ClearPattern,
   ToggleChainPosition,
   SelectPattern,
   SelectTrack,

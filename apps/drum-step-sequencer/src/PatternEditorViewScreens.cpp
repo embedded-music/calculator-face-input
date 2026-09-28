@@ -154,14 +154,24 @@ void PatternEditorView::drawSoundsPatternChange(
   display_.endWrite();
 }
 
-void PatternEditorView::drawArrangement(const PatternEditorState& state) {
-  display_.startWrite();
-  display_.fillScreen(COLOR_BACKGROUND);
+void PatternEditorView::drawArrangementHeader(
+    const PatternEditorState& state) {
   display_.fillRect(0, 0, display_.width(), HEADER_HEIGHT, COLOR_HEADER);
   display_.setTextSize(2);
   display_.setTextColor(COLOR_TEXT, COLOR_HEADER);
   display_.setCursor(8, 8);
   display_.print("ARRANGEMENT");
+  display_.setTextSize(1);
+  display_.setCursor(152, 5);
+  display_.printf("A CLONE:%s", state.cloneMode() ? "ON" : "OFF");
+  display_.setCursor(152, 18);
+  display_.print("B CLEAR  C BACK");
+}
+
+void PatternEditorView::drawArrangement(const PatternEditorState& state) {
+  display_.startWrite();
+  display_.fillScreen(COLOR_BACKGROUND);
+  drawArrangementHeader(state);
   drawArrangementValuesContent(state);
   display_.endWrite();
 }
@@ -180,26 +190,24 @@ void PatternEditorView::drawArrangementValuesContent(
       if (row == 0) {
         fill = state.patternEmpty(column) ? COLOR_SELECTED_MUTED : COLOR_SELECTED;
         label = PATTERN_KEYS[column];
-      } else if (row == 1 && column == 3) {
-        label = state.cloneMode() ? "Clone ON" : "Clone OFF";
-        if (state.cloneMode()) fill = COLOR_TEXT;
-      } else if (row == 4 && column == 3) {
-        label = "Clear";
-      } else if (column < 3) {
+      } else {
         chainCell = true;
-        chainPosition = static_cast<uint8_t>((row - 1) * 3 + column);
+        chainPosition = static_cast<uint8_t>((row - 1) * 4 + column);
         const bool enabled = state.chainPositionEnabled(chainPosition);
-        const bool pendingRemoval = !enabled && chainPosition == state.chainPosition();
+        const bool pendingRemoval =
+            !enabled && chainPosition == state.chainPosition();
         fill = enabled ? COLOR_STEP_ON
                        : pendingRemoval ? COLOR_STEP_PENDING : COLOR_STEP_OFF;
         label = PATTERN_KEYS[state.chainPatternAt(chainPosition)];
       }
       display_.fillRect(x, y, KEY_WIDTH - 3, KEY_HEIGHT - 3, fill);
       display_.drawRect(x, y, KEY_WIDTH - 3, KEY_HEIGHT - 3, COLOR_GRID);
-      display_.setTextSize((row == 1 || row == 4) && column == 3 ? 1 : 2);
-      display_.setTextColor(fill == COLOR_STEP_OFF ? COLOR_TEXT : COLOR_BACKGROUND, fill);
+      display_.setTextSize(2);
+      display_.setTextColor(
+          fill == COLOR_STEP_OFF ? COLOR_TEXT : COLOR_BACKGROUND, fill);
       display_.setTextDatum(MC_DATUM);
-      display_.drawString(label, x + (KEY_WIDTH - 3) / 2, y + (KEY_HEIGHT - 3) / 2);
+      display_.drawString(label, x + (KEY_WIDTH - 3) / 2,
+                          y + (KEY_HEIGHT - 3) / 2);
       display_.setTextDatum(TL_DATUM);
       if (chainCell && state.chainPositionVisible(chainPosition)) {
         const bool current = chainPosition == state.chainPosition();
@@ -215,6 +223,7 @@ void PatternEditorView::drawArrangementValuesContent(
 
 void PatternEditorView::drawArrangementValues(const PatternEditorState& state) {
   display_.startWrite();
+  drawArrangementHeader(state);
   drawArrangementValuesContent(state);
   display_.endWrite();
 }

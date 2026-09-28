@@ -58,12 +58,12 @@ void test_sparse_chain_advances_only_enabled_positions() {
   TEST_ASSERT_EQUAL_UINT8(1, state.chainLength());
   TEST_ASSERT_TRUE(state.chainPositionEnabled(0));
 
-  TEST_ASSERT_TRUE(state.toggleChainPosition(10));
+  TEST_ASSERT_TRUE(state.toggleChainPosition(15));
   TEST_ASSERT_EQUAL_UINT8(2, state.chainLength());
-  TEST_ASSERT_EQUAL_UINT8(10, state.nextChainPosition());
+  TEST_ASSERT_EQUAL_UINT8(15, state.nextChainPosition());
 
   TEST_ASSERT_TRUE(state.advanceByElapsedSteps(STEP_COUNT).crossedCycle());
-  TEST_ASSERT_EQUAL_UINT8(10, state.chainPosition());
+  TEST_ASSERT_EQUAL_UINT8(15, state.chainPosition());
   TEST_ASSERT_EQUAL_UINT8(0, state.nextChainPosition());
 
   TEST_ASSERT_TRUE(state.advanceByElapsedSteps(STEP_COUNT).crossedCycle());
@@ -72,18 +72,34 @@ void test_sparse_chain_advances_only_enabled_positions() {
 
 void test_current_chain_position_removal_is_quantized() {
   PatternEditorState state;
-  TEST_ASSERT_TRUE(state.toggleChainPosition(10));
+  TEST_ASSERT_TRUE(state.toggleChainPosition(15));
   TEST_ASSERT_TRUE(state.advanceByElapsedSteps(STEP_COUNT).crossedCycle());
-  TEST_ASSERT_EQUAL_UINT8(10, state.chainPosition());
+  TEST_ASSERT_EQUAL_UINT8(15, state.chainPosition());
 
-  TEST_ASSERT_TRUE(state.toggleChainPosition(10));
-  TEST_ASSERT_FALSE(state.chainPositionEnabled(10));
-  TEST_ASSERT_EQUAL_UINT8(10, state.chainPosition());
-  TEST_ASSERT_TRUE(state.chainPositionVisible(10));
+  TEST_ASSERT_TRUE(state.toggleChainPosition(15));
+  TEST_ASSERT_FALSE(state.chainPositionEnabled(15));
+  TEST_ASSERT_EQUAL_UINT8(15, state.chainPosition());
+  TEST_ASSERT_TRUE(state.chainPositionVisible(15));
 
   TEST_ASSERT_TRUE(state.advanceByElapsedSteps(STEP_COUNT).crossedCycle());
   TEST_ASSERT_EQUAL_UINT8(0, state.chainPosition());
-  TEST_ASSERT_FALSE(state.chainPositionEnabled(10));
+  TEST_ASSERT_FALSE(state.chainPositionEnabled(15));
+}
+
+void test_full_chain_visits_all_sixteen_positions() {
+  PatternEditorState state;
+  for (uint8_t position = 1; position < CHAIN_MAX_LENGTH; position++) {
+    TEST_ASSERT_TRUE(state.toggleChainPosition(position));
+  }
+  TEST_ASSERT_EQUAL_UINT8(16, state.chainLength());
+
+  for (uint8_t position = 1; position < CHAIN_MAX_LENGTH; position++) {
+    TEST_ASSERT_TRUE(state.advanceByElapsedSteps(STEP_COUNT).crossedCycle());
+    TEST_ASSERT_EQUAL_UINT8(position, state.chainPosition());
+  }
+  TEST_ASSERT_EQUAL_UINT8(0, state.nextChainPosition());
+  TEST_ASSERT_TRUE(state.advanceByElapsedSteps(STEP_COUNT).crossedCycle());
+  TEST_ASSERT_EQUAL_UINT8(0, state.chainPosition());
 }
 
 void test_clone_and_clear_preserve_sound_choices() {
@@ -211,14 +227,17 @@ void test_command_map_routes_each_mode_semantically() {
                               commandForMode(UiMode::Sounds, '=').action));
   TEST_ASSERT_EQUAL_UINT8(19, commandForMode(UiMode::Sounds, '=').index);
 
-  const SequencerCommand chain = commandForMode(UiMode::Arrangement, '0');
-  TEST_ASSERT_EQUAL_UINT8(
-      static_cast<uint8_t>(SequencerAction::ToggleChainPosition),
-      static_cast<uint8_t>(chain.action));
-  TEST_ASSERT_EQUAL_UINT8(10, chain.index);
-  TEST_ASSERT_EQUAL_UINT8(static_cast<uint8_t>(SequencerAction::ClearPattern),
-                          static_cast<uint8_t>(
-                              commandForMode(UiMode::Arrangement, '=').action));
+  const uint8_t chainKeys[] = {
+      '7', '8', '9', '*', '4', '5', '6', '-',
+      '1', '2', '3', '+', '.', '0', '`', '='};
+  for (uint8_t position = 0; position < CHAIN_MAX_LENGTH; position++) {
+    const SequencerCommand chain =
+        commandForMode(UiMode::Arrangement, chainKeys[position]);
+    TEST_ASSERT_EQUAL_UINT8(
+        static_cast<uint8_t>(SequencerAction::ToggleChainPosition),
+        static_cast<uint8_t>(chain.action));
+    TEST_ASSERT_EQUAL_UINT8(position, chain.index);
+  }
 }
 
 void test_playback_with_fake_clock_and_event_sink() {
@@ -292,6 +311,7 @@ int main() {
   RUN_TEST(test_triplet_rates_bypass_swing);
   RUN_TEST(test_sparse_chain_advances_only_enabled_positions);
   RUN_TEST(test_current_chain_position_removal_is_quantized);
+  RUN_TEST(test_full_chain_visits_all_sixteen_positions);
   RUN_TEST(test_clone_and_clear_preserve_sound_choices);
   RUN_TEST(test_settings_clamp_and_rate_boundaries);
   RUN_TEST(test_step_level_modifiers_replace_existing_level);

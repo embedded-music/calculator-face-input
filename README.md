@@ -4,10 +4,8 @@ Pattern 256 is a compact drum sequencer for M5Stack devices. The current
 edition turns the original M5Stack Faces Calculator and M5Stack Core Gray into
 a four-track, sixteen-step instrument; a Cardputer ADV edition is planned.
 
-The name describes the product's 16-step pattern and 16-position arrangement
-target. The current Calculator edition exposes twelve chain positions, for a
-maximum 192-step arrangement. Reaching the full 256-step target is future
-product work rather than a claim about the present firmware.
+The name describes the product's sixteen-step patterns and sixteen-position
+arrangement: a chain can span 256 programmed steps before repeating.
 
 This repository began as a Calculator input probe and records the instrument's
 growth into a playable hardware experiment. It contains the firmware, shared
@@ -81,14 +79,15 @@ level instead of toggling the step off.
 - Press **B** to toggle the sound browser for the selected track. Press it
   again to return to the pattern.
 - Press **C** to toggle the arrangement screen. Its yellow top row selects the
-  next pattern with **AC**, **M**, **%**, or **/**. The twelve cells below are
+  next pattern with **AC**, **M**, **%**, or **/**. The sixteen cells below are
   chain positions: press their calculator keys to toggle positions on or off.
   The active positions, in grid order, form the chain. The current and
   upcoming chain positions are marked in the grid.
-  The **\*** cell toggles Clone mode; when it is ON, choosing a pattern first
-  copies the current pattern into that slot before queuing it.
-  The **=** cell clears all steps from the currently selected next pattern,
-  while preserving its sound choices.
+  While the arrangement is open, Core button **A** toggles Clone mode; when it
+  is ON, choosing a pattern first copies the current pattern into that slot
+  before queuing it. Core button **B** clears all steps from the currently
+  selected next pattern while preserving its sound choices. Core button **C**
+  returns to the pattern screen.
 
 The Settings screen uses two compact Calculator rows: `A`/`M` adjust volume,
 `%`/`/` adjust tempo, `7`/`8` adjust step rate, and `9`/`*` adjust swing from

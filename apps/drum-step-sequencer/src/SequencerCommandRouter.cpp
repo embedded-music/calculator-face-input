@@ -61,31 +61,16 @@ void SequencerCommandRouter::handleCalculatorValue(
   }
 
   if (mode_ == UiMode::Arrangement) {
-    if (command.action == SequencerAction::ToggleClone) {
-      editor_.toggleCloneMode();
-      view_.drawArrangementValues(editor_);
-      Serial.printf("arrangement: action=clone_mode value=%s\n",
-                    editor_.cloneMode() ? "on" : "off");
-      return;
-    }
-    if (command.action == SequencerAction::ClearPattern) {
-      const uint8_t targetPattern = editor_.nextPattern();
-      editor_.clearPattern(targetPattern);
-      view_.drawArrangementValues(editor_);
-      Serial.printf("arrangement: action=clear_pattern target=%u\n",
-                    targetPattern + 1);
-      return;
-    }
     if (command.action == SequencerAction::ToggleChainPosition) {
-        if (editor_.toggleChainPosition(command.index)) {
-          view_.drawArrangementValues(editor_);
-          Serial.printf(
-              "arrangement: action=toggle_chain position=%u active=%s length=%u\n",
-              command.index + 1,
-              editor_.chainPositionEnabled(command.index) ? "yes" : "no",
-              editor_.chainLength());
-        }
-        return;
+      if (editor_.toggleChainPosition(command.index)) {
+        view_.drawArrangementValues(editor_);
+        Serial.printf(
+            "arrangement: action=toggle_chain position=%u active=%s length=%u\n",
+            command.index + 1,
+            editor_.chainPositionEnabled(command.index) ? "yes" : "no",
+            editor_.chainLength());
+      }
+      return;
     }
     if (command.action != SequencerAction::SelectPattern) return;
     const uint8_t patternIndex = command.index;
@@ -133,6 +118,23 @@ void SequencerCommandRouter::handleCalculatorValue(
 }
 
 void SequencerCommandRouter::handleCoreButton(SequencerInputEventType button) {
+  if (mode_ == UiMode::Arrangement &&
+      button == SequencerInputEventType::ButtonA) {
+    editor_.toggleCloneMode();
+    view_.drawArrangementValues(editor_);
+    Serial.printf("arrangement: action=clone_mode value=%s\n",
+                  editor_.cloneMode() ? "on" : "off");
+    return;
+  }
+  if (mode_ == UiMode::Arrangement &&
+      button == SequencerInputEventType::ButtonB) {
+    const uint8_t targetPattern = editor_.nextPattern();
+    editor_.clearPattern(targetPattern);
+    view_.drawArrangementValues(editor_);
+    Serial.printf("arrangement: action=clear_pattern target=%u\n",
+                  targetPattern + 1);
+    return;
+  }
   if (button == SequencerInputEventType::ButtonA) {
     mode_ = mode_ == UiMode::Settings ? UiMode::Pattern : UiMode::Settings;
     Serial.println("core_button: name=a action=pressed");
