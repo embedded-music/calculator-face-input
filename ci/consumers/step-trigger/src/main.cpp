@@ -1,6 +1,6 @@
 #include "TriggerEventSink.h"
 #include "TriggerPattern.h"
-#include "TriggerPatternPlayer.h"
+#include "TriggerPatternEmitter.h"
 
 class ConsumerSink final : public TriggerEventSink {
  public:
@@ -21,7 +21,7 @@ int main() {
   pattern.setStepLevel(2, 11, StepLevel::Strong);
 
   ConsumerSink sink;
-  const uint8_t emitted = TriggerPatternPlayer::emitStep(pattern, 11, sink);
+  const uint8_t emitted = TriggerPatternEmitter::emitStep(pattern, 11, sink);
   return emitted == 1 && sink.count == 1 && sink.lastLane == 2 &&
                  sink.lastLevel == StepLevel::Strong
              ? 0

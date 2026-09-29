@@ -18,7 +18,9 @@ package-m5burner:
     tools/package-m5burner.sh
 
 test-native:
+    {{pio}} test -d packages/step-trigger -e native
     {{pio}} test -e native
+    tools/test-step-trigger-consumer.sh
 
 upload-sequencer:
     {{pio}} run -e drum-step-sequencer --target upload
