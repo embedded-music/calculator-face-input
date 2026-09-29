@@ -1,3 +1,5 @@
+<img style="float:right" width="auto" height="400" alt="Image" src="https://github.com/user-attachments/assets/f5df972d-ec58-4438-ab25-abda6c0f1bcb" align="right" />
+
 # Pattern 256
 
 Pattern 256 is a compact drum sequencer for M5Stack devices. The current
