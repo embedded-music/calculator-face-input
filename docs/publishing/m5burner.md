@@ -20,8 +20,23 @@ dist/m5burner/pattern256-calculator-v0.1.0.bin
 ```
 
 It also writes a SHA-256 checksum alongside the image. The versioned binary is
-an ignored build artifact and should be attached to a tagged GitHub release
-rather than committed to the repository.
+an ignored build artifact and should not be committed to the repository.
+
+## Publish a GitHub release
+
+After the hardware release gate passes, tag the validated revision with the
+version from `VERSION` and push the tag:
+
+```text
+jj tag set pattern256-v0.1.0
+jj git push --tag pattern256-v0.1.0
+```
+
+The `Release firmware` GitHub Actions workflow validates that the tag and
+`VERSION` agree, runs the native tests, rebuilds the merged image, verifies its
+checksum, and creates a GitHub release containing both files. Application
+release tags use `pattern256-vX.Y.Z`, keeping them distinct from this
+repository's `step-trigger-vX.Y.Z` package tags.
 
 The merged image is flashed from address `0x0`. It contains:
 
@@ -80,10 +95,9 @@ build slice.
 
 ## Updating a release
 
-Change `VERSION`, rebuild and re-run the hardware checks. In M5Burner, open
-the existing entry's **Detail** action and upload the new version. Keep the
-corresponding source revision discoverable through a matching Git tag and
-GitHub release.
+Change `VERSION`, rebuild and re-run the hardware checks, then push the matching
+`pattern256-vX.Y.Z` tag. In M5Burner, open the existing entry's **Detail**
+action and upload the binary from the resulting GitHub release.
 
 ## Official references
 

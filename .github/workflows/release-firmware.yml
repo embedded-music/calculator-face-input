@@ -1,0 +1,74 @@
+name: Release firmware
+
+on:
+  push:
+    tags:
+      - "pattern256-v*"
+
+permissions:
+  contents: write
+
+env:
+  PLATFORMIO_CORE_DIR: .platformio-home
+
+jobs:
+  release:
+    name: Release ${{ github.ref_name }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install PlatformIO
+        run: python -m pip install platformio==6.2.0
+
+      - name: Validate release tag
+        id: release
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          tag="${GITHUB_REF_NAME}"
+          version="${tag#pattern256-v}"
+          project_version="$(tr -d '[:space:]' < VERSION)"
+
+          if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Unsupported firmware tag: $tag" >&2
+            exit 2
+          fi
+          if [[ "$version" != "$project_version" ]]; then
+            echo "Tag version '$version' does not match VERSION '$project_version'." >&2
+            exit 1
+          fi
+
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Run step-trigger native tests
+        run: pio test -d packages/step-trigger -e native
+
+      - name: Run Calculator native tests
+        run: pio test -e native
+
+      - name: Package M5Burner image
+        run: tools/package-m5burner.sh
+
+      - name: Verify checksum
+        working-directory: dist/m5burner
+        run: sha256sum --check "pattern256-calculator-v${{ steps.release.outputs.version }}.bin.sha256"
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            "dist/m5burner/pattern256-calculator-v${{ steps.release.outputs.version }}.bin" \
+            "dist/m5burner/pattern256-calculator-v${{ steps.release.outputs.version }}.bin.sha256" \
+            --verify-tag \
+            --title "Pattern 256 ${{ steps.release.outputs.version }}" \
+            --generate-notes
